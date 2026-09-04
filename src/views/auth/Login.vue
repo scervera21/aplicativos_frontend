@@ -9,7 +9,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 
 const form = reactive({
-  email: '',
+  username: '',
   password: '',
 });
 
@@ -41,12 +41,12 @@ async function handleLogin() {
       <h2 class="text-3xl font-bold text-center text-slate-800 mb-2">Gestion de Aplicativos</h2>
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Correo Electrónico</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2">Usuario de red</label>
           <input
-            v-model="form.email"
-            type="email"
+            v-model="form.username"
+            type="username"
             required
-            class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
         </div>
 
@@ -56,7 +56,7 @@ async function handleLogin() {
             v-model="form.password"
             type="password"
             required
-            class="w-full px-4 py-3 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
             placeholder="••••••••"
           />
         </div>

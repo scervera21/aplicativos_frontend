@@ -1,18 +1,42 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import apiClient from '@/plugins/axios'
 import { useAuthStore } from '@/stores/authStore'
+import Swal from 'sweetalert2'
 
+const router = useRouter()
 const authStore = useAuthStore()
 const loggingOut = ref(false)
 const testingAction = ref(false)
 const testResult = ref<string | null>(null)
 
 const handleLogout = async () => {
-  if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+  const result = await Swal.fire({
+    title: '¿Cerrar sesión?',
+    text: 'Se finalizará la sesión actual.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, cerrar sesión',
+    cancelButtonText: 'Cancelar'
+  })
+
+  if (result.isConfirmed) {
     loggingOut.value = true
     await authStore.logout()
     loggingOut.value = false
+
+    Swal.fire({
+      icon: 'success',
+      title: 'Sesión cerrada',
+      text: 'Has salido correctamente del sistema.',
+      timer: 1500,
+      showConfirmButton: false
+    })
+
+    router.push({ name: 'login' })
   }
 }
 

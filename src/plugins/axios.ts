@@ -12,10 +12,10 @@ const apiClient = axios.create({
   timeout: 15000,
 });
 
-const authStore = useAuthStore();
 
 // Interceptor para agregar el token de acceso a cada petición.
 apiClient.interceptors.request.use((config) => {
+  const authStore = useAuthStore();
   const token = authStore.accessToken;
 
       if (token && config.headers) {
@@ -33,6 +33,7 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    const authStore = useAuthStore();
 
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
 
