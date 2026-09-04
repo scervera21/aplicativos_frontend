@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User, LoginResponse, JwtPayload } from '@/interfaces/auth';
 import apiClient from '@/plugins/axios';
+import type { ApiResponse } from '@/interfaces/api';
 
 export const useAuthStore = defineStore('auth', () => {
   // Estado Reactivo
