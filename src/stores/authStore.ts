@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { User, JwtPayload } from '@/interfaces/auth';
 import apiClient from '@/plugins/axios';
+import router from '@/router';
 
 export const useAuthStore = defineStore('auth', () => {
   // Estado Reactivo
@@ -9,7 +10,12 @@ export const useAuthStore = defineStore('auth', () => {
   const accessToken = ref<string | null>(localStorage.getItem('access_token'));
 
   // Propiedades Computadas (Getters)
-  const isAuthenticated = computed(() => !!accessToken.value);
+
+  const isAuthenticated = computed(() => !!accessToken.value && !!user.value);
+
+  const isPasswordChangeRequired = computed((): boolean => {
+    return !user.value?.password_changed;
+  });
 
   const decodedPayload = computed((): JwtPayload | null => {
     if (!accessToken.value) return null;
@@ -24,6 +30,7 @@ export const useAuthStore = defineStore('auth', () => {
     }
   });
 
+  // Permisos del usuario desde el token
   const permissions = computed(() => {
     if (decodedPayload.value?.permissions) {
       return decodedPayload.value.permissions;
@@ -47,6 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
     return { access: accessList, actions: actionsList };
   });
 
+  // Lista de permisos del usuario
   const userPermissions = computed(() => {
     const list: string[] = [];
     if (permissions.value.access) list.push(...permissions.value.access);
@@ -54,8 +62,20 @@ export const useAuthStore = defineStore('auth', () => {
     return list;
   });
 
+
+  // Verificar si el usuario puede acceder a un módulo
+  const canAccessModule = (module: string): boolean => {
+    return userPermissions.value.includes(`acceder_${module}`);
+  };
+
+  // Verificar si el usuario puede realizar una acción en un módulo
+  const canPermissionAction = (module: string, action: string): boolean => {
+    return userPermissions.value.includes(`${action}_${module}`);
+  };
+
+
   // Acciones (Functions)
-  async function login(credentials: { username?: string; email?: string; password: string }): Promise<boolean> {
+  async function login(credentials: { username: string; password: string }): Promise<boolean> {
     try {
       const response = await apiClient.post('/auth/login', credentials);
       const resData = response.data;
@@ -86,18 +106,28 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('access_token', newToken);
   }
 
+  // Actualiza la marca de cambio de contraseña
+  function setPasswordChanged(timestamp: string) {
+    if (user.value) {
+      user.value.password_changed = timestamp
+      localStorage.setItem('user', JSON.stringify(user.value))
+    }
+  }
+
   async function logout() {
     try {
       if (accessToken.value) {
         await apiClient.post('/auth/logout');
       }
     } catch (error) {
-      console.warn('Error notificando logout al backend:', error);
+      console.error('Fallo al cerrar sesión en el servidor:', error)
     } finally {
       accessToken.value = null;
       user.value = null;
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
+
+      router.push('/login');
     }
   }
 

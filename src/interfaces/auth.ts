@@ -27,24 +27,15 @@ export interface User {
   password_changed?: string | null
 }
 
-// Interfaz para definir la estructura de la respuesta del login.
-export interface LoginResponse {
-  token?: string;
-  access_token?: string;
-  refresh_token?: string;
-  token_type?: string;
-  expires_in?: number;
-  user: User;
-  message?: string;
-}
-
 // Interfaz para definir la estructura del payload del token JWT.
 export interface JwtPayload {
   sub?: number;
   iat?: number;
   exp?: number;
+  username: string;
+  email: string;
   permissions?: {
     access: string[];
     actions: string[];
   };
-}
+  

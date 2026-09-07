@@ -167,7 +167,7 @@ const testMe = async () => {
             <svg class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            Roles y Permisos (Spatie ACL)
+            Roles y Permisos
           </h2>
 
           <!-- Lista de Roles -->
@@ -190,7 +190,7 @@ const testMe = async () => {
           <!-- Lista de Permisos -->
           <div class="pt-2">
             <p class="text-xs uppercase tracking-wider font-bold text-slate-400 mb-2">
-              Permisos Calculados ({{ authStore.userPermissions.length }}):
+              Permisos ({{ authStore.userPermissions.length }}):
             </p>
             <div class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
               <span
@@ -231,7 +231,7 @@ const testMe = async () => {
             :disabled="testingAction"
             class="px-4 py-2 text-sm font-semibold rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 disabled:opacity-50 transition border border-slate-600"
           >
-            👤 Consultar Perfil (/v1/auth/me)
+            👤 Consultar Perfil
           </button>
         </div>
 
