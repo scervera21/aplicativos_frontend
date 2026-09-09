@@ -9,7 +9,7 @@ const handleRequest = (error: AxiosError) => {
       if (error.code === 'ECONNABORTED') {
         Swal.fire('Tiempo de Espera Agotado', 'La solicitud excedió el tiempo de espera. Por favor, intenta nuevamente.', 'error')
       } else {
-        Swal.fire('Error de Conexión', 'No se pudo establecer conexión con el servidor. La sesión ha sido cerrada.', 'error')
+        Swal.fire('Error de Conexión', 'No se pudo establecer conexión con el servidor.', 'error')
 
         const authStore = useAuthStore()
         if(authStore.isAuthenticated) {

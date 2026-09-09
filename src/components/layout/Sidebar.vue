@@ -1,4 +1,3 @@
-<!-- frontend/src/components/layout/Sidebar.vue -->
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/authStore';
 import { computed } from 'vue';
@@ -16,7 +15,7 @@ const accessPermissions = computed(() => authStore.permissions.access);
 
       <!-- Filtrado dinámico según Spatie access permissions -->
       <router-link
-        v-if="accessPermissions.includes('acceder_aplicativos')"
+        v-if=""
         to="/aplicativos"
         class="block px-4 py-2 rounded hover:bg-slate-700"
       >

@@ -118,7 +118,7 @@ const testMe = async () => {
               ¡Bienvenido, {{ authStore.user?.first_name }}! 👋
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              Sesión Activa
+              {{ authStore.user?.status }}
             </span>
             </h1>
           </div>
@@ -152,11 +152,6 @@ const testMe = async () => {
             <div class="flex justify-between py-1 border-b border-slate-700/50">
               <span class="text-slate-400">Correo Electrónico:</span>
               <span class="text-white">{{ authStore.user?.email }}</span>
-            </div>
-            <div class="flex justify-between py-1">
-              <span class="text-slate-400">Estatus:</span>
-              <span v-if="authStore.user?.status" class="text-emerald-400 font-semibold">Activo</span>
-              <span v-else class="text-red-400 font-semibold">Inactivo</span>
             </div>
           </div>
         </div>
@@ -223,7 +218,7 @@ const testMe = async () => {
             :disabled="testingAction"
             class="px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition shadow-md shadow-indigo-600/20"
           >
-            🔄 Probar Silent Refresh (/v1/auth/refresh)
+            🔄 Refrescar Token
           </button>
 
           <button

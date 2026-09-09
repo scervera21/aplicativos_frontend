@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import apiClient from '@/plugins/axios';
-import type { ApiResponse } from '@/interfaces/api';
 import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
@@ -20,14 +19,13 @@ const fetchUsers = async () => {
     users.value = response.data;
     console.log(users.value);
   } catch (error) {
-    console.error('Error al cargar usuarios:', error);
   } finally {
     loading.value = false;
   }
 };
 
 onMounted(() => {
-  if (authStore.permissions?.access.includes('users.index')) {
+  if (authStore.hasAccess('users')) {
     fetchUsers();
   } else {
     error.value = 'No tiene permisos para acceder a esta funcionalidad';
@@ -51,8 +49,8 @@ onMounted(() => {
               color="primary"
               variant="elevated"
               prepend-icon="mdi-plus"
+              v-if="authStore.hasAction('users', 'crear')"
               @click="$router.push('/users/registro')"
-              :disabled="!authStore.permissions?.actions.includes('users.store')"
             >
               Nuevo Usuario
             </v-btn>
@@ -141,8 +139,8 @@ onMounted(() => {
                       variant="text"
                       size="small"
                       color="warning"
-                      @click="$router.push(`/users/actualizar/${user}`)"
-                      :disabled="!authStore.permissions?.actions.includes('users.update')"
+                      v-if="authStore.hasAction('editar','users')"
+                      @click="$router.push(`/users/editar/${user}`)"
                       title="Editar"
                     >
                       <v-icon>mdi-pencil</v-icon>
@@ -163,7 +161,8 @@ onMounted(() => {
                       variant="text"
                       size="small"
                       color="error"
-                      :disabled="!authStore.permissions?.actions.includes('users.delete')"
+                      v-if="authStore.hasAction('eliminar', 'users')"
+                      @click="$router.push(`/users/${user}`)"
                       title="Eliminar"
                     >
                       <v-icon>mdi-delete</v-icon>

@@ -37,5 +37,5 @@ export interface JwtPayload {
   permissions?: {
     access: string[];
     actions: string[];
-  };
-  
+  }
+}

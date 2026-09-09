@@ -11,8 +11,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Propiedades Computadas (Getters)
 
+  // Verificación de autenticación
   const isAuthenticated = computed(() => !!accessToken.value && !!user.value);
 
+  // Verificación si el usuario debe cambiar su contraseña
   const isPasswordChangeRequired = computed((): boolean => {
     return !user.value?.password_changed;
   });
@@ -32,9 +34,14 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Permisos del usuario desde el token
   const permissions = computed(() => {
+    // Si el usuario no está logueado
+    if (!user.value) return { access: [], actions: [] };
+    
+    // Si los permisos vienen en el token
     if (decodedPayload.value?.permissions) {
       return decodedPayload.value.permissions;
     }
+    
     // Si los permisos vienen en las relaciones del usuario
     const accessList: string[] = [];
     const actionsList: string[] = [];
@@ -62,17 +69,15 @@ export const useAuthStore = defineStore('auth', () => {
     return list;
   });
 
-
-  // Verificar si el usuario puede acceder a un módulo
-  const canAccessModule = (module: string): boolean => {
+  // Verifica si el usuario puede acceder a la vista de un módulo
+  function hasAccess(module: string): boolean {
     return userPermissions.value.includes(`acceder_${module}`);
-  };
+  }
 
-  // Verificar si el usuario puede realizar una acción en un módulo
-  const canPermissionAction = (module: string, action: string): boolean => {
+  // Verifica si el usuario puede realizar una acción específica (ej: crear, editar, eliminar)
+  function hasAction(module: string, action: string): boolean {
     return userPermissions.value.includes(`${action}_${module}`);
-  };
-
+  }
 
   // Acciones (Functions)
   async function login(credentials: { username: string; password: string }): Promise<boolean> {
@@ -137,8 +142,12 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated,
     permissions,
     userPermissions,
+    hasAccess,
+    hasAction,
+    isPasswordChangeRequired,
     login,
     saveNewToken,
+    setPasswordChanged,
     logout,
   };
 });

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/login',
@@ -20,7 +20,7 @@ const router = createRouter({
       path: '/users',
       name: 'users',
       component: () => import('@/views/Usuarios.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiredModule: 'users' },
     }
   ],
 });
@@ -28,13 +28,15 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
 
+  // Si la ruta requiere autenticación y el usuario no está logueado
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login' });
-  } else if (to.meta.permission && !authStore.permissions.access.includes(to.meta.permission as string)) {
-    next({ name: 'dashboard' }); // Redirigir si no posee el permiso de Spatie
-  } else {
-    next();
+    return next({ name: 'login' });
+  } 
+  else if (to.meta.requiresAuth && authStore.isAuthenticated || to.meta.requiredModule && !authStore.hasAccess(to.meta.requiredModule as string)) {
+    return next({ name: 'dashboard' });
   }
+
+  next();
 });
 
 export default router;

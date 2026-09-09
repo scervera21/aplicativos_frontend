@@ -3,7 +3,6 @@
 import { reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
-import Swal from 'sweetalert2';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -17,20 +16,13 @@ const isLoading = ref(false);
 
 async function handleLogin() {
   isLoading.value = true;
-  const success = await authStore.login(form);
-  isLoading.value = false;
 
-  if (success) {
-    Swal.fire({
-      icon: 'success',
-      title: '¡Bienvenido!',
-      text: 'Sesión iniciada correctamente.',
-      timer: 1500,
-      showConfirmButton: false,
-    });
+  try {
+    await authStore.login(form);
     router.push({ name: 'dashboard' });
-  } else {
-    Swal.fire('Error', 'Credenciales incorrectas.', 'error');
+  } catch (error) {
+  } finally {
+    isLoading.value = false;
   }
 }
 </script>
