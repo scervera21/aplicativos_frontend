@@ -21,6 +21,11 @@ const router = createRouter({
       name: 'users',
       component: () => import('@/views/Usuarios.vue'),
       meta: { requiresAuth: true, requiredModule: 'users' },
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('@/views/error/404.vue'),
     }
   ],
 });
