@@ -146,7 +146,7 @@ const testMe = async () => {
               <span class="font-semibold text-white">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</span>
             </div>
             <div class="flex justify-between py-1 border-b border-slate-700/50">
-              <span class="text-slate-400">Nombre de Usuario:</span>
+              <span class="text-slate-400">Usuario:</span>
               <span class="font-mono text-indigo-300">@{{ authStore.user?.username }}</span>
             </div>
             <div class="flex justify-between py-1 border-b border-slate-700/50">
@@ -177,7 +177,7 @@ const testMe = async () => {
                 {{ role.name }}
               </span>
               <span v-if="!authStore.user?.roles?.length" class="text-xs text-slate-500 italic">
-                Sin roles asignados
+                Sin roles
               </span>
             </div>
           </div>
@@ -196,7 +196,7 @@ const testMe = async () => {
                 {{ perm }}
               </span>
               <span v-if="!authStore.userPermissions.length" class="text-xs text-slate-500 italic">
-                Sin permisos activos
+                Sin permisos
               </span>
             </div>
           </div>

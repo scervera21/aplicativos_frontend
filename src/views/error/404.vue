@@ -5,7 +5,7 @@ import { RouterLink } from "vue-router";
 <template>
     <div class="container">
         <h1>404</h1>
-        <p>Página no encontrada</p>
+        <h2>Página no encontrada</h2>
         <RouterLink to="/dashboard" tag="button" class="btn">Volver al inicio</RouterLink>
     </div>
 </template>
@@ -30,7 +30,7 @@ h1 {
     color: #007bff;
 }
 
-p {
+h2 {
     color: #007bff;
 }
 

@@ -15,7 +15,7 @@ const accessPermissions = computed(() => authStore.permissions.access);
 
       <!-- Filtrado dinámico según Spatie access permissions -->
       <router-link
-        v-if=""
+        v-if="accessPermissions.includes('acceder_aplicativos')"
         to="/aplicativos"
         class="block px-4 py-2 rounded hover:bg-slate-700"
       >
@@ -31,7 +31,7 @@ const accessPermissions = computed(() => authStore.permissions.access);
       </router-link>
 
       <router-link
-        v-if="accessPermissions.includes('acceder_roles')"
+        v-if="accessPermissions.includes('acceder_roles') && accessPermissions.includes('acceder_permisos')"
         to="/roles"
         class="block px-4 py-2 rounded hover:bg-slate-700"
       >

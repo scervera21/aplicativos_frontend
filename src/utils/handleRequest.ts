@@ -11,6 +11,7 @@ const handleRequest = (error: AxiosError) => {
       } else {
         Swal.fire('Error de Conexión', 'No se pudo establecer conexión con el servidor.', 'error')
 
+        // Cierre de sesión seguro en el frontend si había un usuario autenticado.
         const authStore = useAuthStore()
         if(authStore.isAuthenticated) {
           authStore.logout()
@@ -47,7 +48,7 @@ const handleRequest = (error: AxiosError) => {
         Swal.fire('Error de Servidor', errorMessage || 'Ocurrió un problema en el servidor. Inténtalo más tarde.', 'error')
         break
       default:
-        Swal.fire('Error', errorMessage, 'error')
+        alert(`Error ${status}: ${errorMessage}`)        
         break
     }
 }

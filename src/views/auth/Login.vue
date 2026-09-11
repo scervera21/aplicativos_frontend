@@ -15,12 +15,15 @@ const form = reactive({
 const isLoading = ref(false);
 
 async function handleLogin() {
+
+  if (!form.username || !form.password) return
   isLoading.value = true;
 
   try {
     await authStore.login(form);
     router.push({ name: 'dashboard' });
   } catch (error) {
+    console.error('Fallo en autenticación:', error)
   } finally {
     isLoading.value = false;
   }
@@ -30,13 +33,17 @@ async function handleLogin() {
 <template>
   <div class="min-h-screen flex items-center justify-center bg-slate-900 px-4">
     <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8">
+
+      <!-- Encabezado -->
       <h2 class="text-3xl font-bold text-center text-slate-800 mb-2">Gestion de Aplicativos</h2>
+
+      <!-- Formulario -->
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
-          <label class="block text-sm font-medium text-slate-700 mb-2">Usuario de red</label>
+          <label class="block text-sm font-medium text-slate-700 mb-2">Usuario</label>
           <input
             v-model="form.username"
-            type="username"
+            type="text"
             required
             class="w-full px-4 py-3 rounded-lg border border-slate-300 bg-white text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
           />
@@ -53,12 +60,13 @@ async function handleLogin() {
           />
         </div>
 
+        <!-- Botón de envio -->
         <button
           type="submit"
           :disabled="isLoading"
           class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-lg transition duration-200"
         >
-          {{ isLoading ? 'Iniciando Sesión...' : 'Iniciar Sesión' }}
+          {{ isLoading ? 'Ingresando...' : 'Iniciar Sesión' }}
         </button>
       </form>
     </div>

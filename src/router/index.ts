@@ -5,7 +5,7 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/login',
+      path: '/',
       name: 'login',
       component: () => import('@/views/auth/Login.vue'),
       meta: { requiresAuth: false },
@@ -23,6 +23,12 @@ const router = createRouter({
       meta: { requiresAuth: true, requiredModule: 'users' },
     },
     {
+      path: '/aplicativos',
+      name: 'aplicativos',
+      component: () => import('@/views/Aplicativos.vue'),
+      meta: { requiresAuth: true, requiredModule: 'aplicativos' },
+    },
+    {
       path: '/:pathMatch(.*)*',
       name: 'not-found',
       component: () => import('@/views/error/404.vue'),
@@ -36,11 +42,12 @@ router.beforeEach((to, from, next) => {
   // Si la ruta requiere autenticación y el usuario no está logueado
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return next({ name: 'login' });
-  } 
+  }
+
+  // Si la ruta requiere autenticación y el usuario está logueado o la ruta requiere un módulo específico y el usuario no tiene acceso
   else if (to.meta.requiresAuth && authStore.isAuthenticated || to.meta.requiredModule && !authStore.hasAccess(to.meta.requiredModule as string)) {
     return next({ name: 'dashboard' });
   }
-
   next();
 });
 

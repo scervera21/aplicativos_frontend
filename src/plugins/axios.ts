@@ -13,7 +13,7 @@ const apiClient = axios.create({
 });
 
 
-// Interceptor para agregar el token de acceso a cada petición.
+// Interceptor para agregar el token de acceso jwt a cada petición.
 apiClient.interceptors.request.use((config) => {
   const authStore = useAuthStore();
   const token = authStore.accessToken;

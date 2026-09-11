@@ -1,4 +1,3 @@
-@import "tailwindcss";
 
 // Abstracts — no CSS output, just tools (must come first)
 @use 'abstracts/variables';
@@ -25,3 +24,5 @@
 
 // Vendors — third-party overrides
 @use 'vendors/sweetalert';
+
+@import "tailwindcss";

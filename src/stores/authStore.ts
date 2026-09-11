@@ -11,7 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   // Propiedades Computadas (Getters)
 
-  // Verificación de autenticación
+  // Verificación de autenticación 
   const isAuthenticated = computed(() => !!accessToken.value && !!user.value);
 
   // Verificación si el usuario debe cambiar su contraseña
@@ -93,6 +93,7 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken.value = token;
         user.value = userData || null;
         localStorage.setItem('access_token', token);
+        localStorage.setItem('user', JSON.stringify(userData));
 
         const refreshToken = resData.refresh_token || resData.data?.refresh_token;
         if (refreshToken) {
