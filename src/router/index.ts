@@ -20,13 +20,13 @@ const router = createRouter({
       path: '/users',
       name: 'users',
       component: () => import('@/views/Usuarios.vue'),
-      meta: { requiresAuth: true, requiredModule: 'users' },
+      meta: { requiresAuth: true, permission: 'acceder_usuarios' },
     },
     {
       path: '/aplicativos',
       name: 'aplicativos',
       component: () => import('@/views/Aplicativos.vue'),
-      meta: { requiresAuth: true, requiredModule: 'aplicativos' },
+      meta: { requiresAuth: true, permission: 'acceder_aplicativos'},
     },
     {
       path: '/:pathMatch(.*)*',
@@ -36,19 +36,20 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from) => {
   const authStore = useAuthStore();
+  const isAuthenticated = authStore.isAuthenticated;
 
   // Si la ruta requiere autenticación y el usuario no está logueado
-  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return next({ name: 'login' });
+  if (to.meta.requiresAuth && !isAuthenticated) {
+    return { name: 'login' };
   }
-
-  // Si la ruta requiere autenticación y el usuario está logueado o la ruta requiere un módulo específico y el usuario no tiene acceso
-  else if (to.meta.requiresAuth && authStore.isAuthenticated || to.meta.requiredModule && !authStore.hasAccess(to.meta.requiredModule as string)) {
-    return next({ name: 'dashboard' });
+  // Si la ruta requiere un permiso específico y el usuario no lo tiene
+  else if (to.meta.permission && !authStore.userPermissions.includes(to.meta.permission as string)) {
+    return { name: 'dashboard' };
+  } else {
+    return true;
   }
-  next();
 });
 
 export default router;

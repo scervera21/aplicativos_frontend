@@ -3,6 +3,7 @@
   import { useAuthStore } from './stores/authStore';
   import { ref } from 'vue';
   import Sidebar from './components/layout/Sidebar.vue';
+  import Header from './components/layout/Header.vue';
 
   const authStore = useAuthStore()
   const sidebarVisible = ref(false)

@@ -18,4 +18,18 @@
         justify-content: center;
         height: 100vh;
     }
+    .btn {
+        padding: 10px 20px;
+        border-radius: 5px;
+        background-color: #007bff;
+        color: #fff;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+
+    .btn:hover {
+        background-color: #0056b3;
+        border: 1px solid #0056b3;
+    }
 </style>

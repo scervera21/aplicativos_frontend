@@ -19,6 +19,7 @@ const fetchUsers = async () => {
     users.value = response.data;
     console.log(users.value);
   } catch (error) {
+    console.error('Error al cargar usuarios:', error);
   } finally {
     loading.value = false;
   }
@@ -28,7 +29,7 @@ onMounted(() => {
   if (authStore.hasAccess('users')) {
     fetchUsers();
   } else {
-    error.value = 'No tiene permisos para acceder a esta funcionalidad';
+    error.value = 'No tiene permisos para acceder a este modulo';
   }
 });
 </script>
