@@ -6,43 +6,48 @@ const authStore = useAuthStore();
 </script>
 
 <template>
+  <aside class="w-64 bg-slate-800/95 border-r border-slate-700/80 flex flex-col shrink-0">
 
-  <aside class="w-64 bg-slate-800 text-slate-200 min-h-screen p-4">
-        <div class="flex items-center gap-3 p-2 mb-2">
-          <div class="h-9 w-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-md shadow-indigo-500/20">
-            <svg class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-            </svg>
-          </div>
-          <span class="font-bold text-lg text-white">Menu principal</span>
-        </div>
-    <nav class="space-y-2">
-      <router-link to="/dashboard" class="block px-4 py-2 rounded hover:bg-slate-700">
-        📊 Dashboard
+    <!-- Enlaces de navegación -->
+    <nav class="flex-1 p-3 space-y-1.5 overflow-y-auto">
+      <router-link
+        to="/dashboard"
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-150"
+        active-class="bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 !font-semibold shadow-sm"
+      >
+        <span class="text-base">📊</span>
+        <span>Dashboard</span>
       </router-link>
 
-      <!-- Filtrado dinámico según Spatie -->
+      <!-- Filtrado dinámico según Spatie Access Permissions -->
       <router-link
         v-if="authStore.hasAccess('aplicativos')"
         to="/aplicativos"
-        class="block px-4 py-2 rounded hover:bg-slate-700"
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-150"
+        active-class="bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 !font-semibold shadow-sm"
       >
-        🗂 Aplicativos
+        <span class="text-base">🗂</span>
+        <span>Aplicativos</span>
       </router-link>
 
       <router-link
         v-if="authStore.hasAccess('usuarios')"
         to="/users"
-        class="block px-4 py-2 rounded hover:bg-slate-700"
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-150"
+        active-class="bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 !font-semibold shadow-sm"
       >
-        👥 Usuarios
+        <span class="text-base">👥</span>
+        <span>Usuarios</span>
       </router-link>
 
       <router-link
+        v-if="authStore.hasAccess('roles')"
         to="/roles"
-        class="block px-4 py-2 rounded hover:bg-slate-700"
+        class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl font-medium text-sm text-slate-300 hover:text-white hover:bg-slate-700/60 transition-all duration-150"
+        active-class="bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 !font-semibold shadow-sm"
       >
-        🛡️ Roles y Permisos
+        <span class="text-base">🛡️</span>
+        <span>Roles y Permisos</span>
       </router-link>
     </nav>
   </aside>

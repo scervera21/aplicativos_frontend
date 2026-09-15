@@ -1,44 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-// import { useRouter } from 'vue-router'
 import apiClient from '@/plugins/axios'
 import { useAuthStore } from '@/stores/authStore'
-// import Swal from 'sweetalert2'
 
-// const router = useRouter()
 const authStore = useAuthStore()
-// const loggingOut = ref(false)
 const testingAction = ref(false)
 const testResult = ref<string | null>(null)
-
-// const handleLogout = async () => {
-//   const result = await Swal.fire({
-//     title: '¿Cerrar sesión?',
-//     text: 'Se finalizará la sesión actual.',
-//     icon: 'question',
-//     showCancelButton: true,
-//     confirmButtonColor: '#3085d6',
-//     cancelButtonColor: '#d33',
-//     confirmButtonText: 'Sí, cerrar sesión',
-//     cancelButtonText: 'Cancelar'
-//   })
-
-//   if (result.isConfirmed) {
-//     loggingOut.value = true
-//     await authStore.logout()
-//     loggingOut.value = false
-
-//     Swal.fire({
-//       icon: 'success',
-//       title: 'Sesión cerrada',
-//       text: 'Has salido correctamente del sistema.',
-//       timer: 1500,
-//       showConfirmButton: false
-//     })
-
-//     router.push({ name: 'login' })
-//   }
-// }
 
 const testRefresh = async () => {
   testingAction.value = true
@@ -71,8 +38,6 @@ const testMe = async () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-slate-900 text-slate-100 flex flex-col">
-
     <!-- Contenido Principal -->
     <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <!-- Tarjeta de Bienvenida y Estado de Sesión -->
@@ -201,5 +166,4 @@ const testMe = async () => {
         </div>
       </div>
     </main>
-  </div>
 </template>
