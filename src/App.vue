@@ -8,7 +8,7 @@
 </script>
 
 <template>
-  <div id="app" class="min-h-screen flex flex-col bg-slate-900 text-slate-100 antialiased font-sans">
+  <div id="app" class="min-h-screen flex flex-col bg-[#d6d2da] antialiased font-sans">
     <!-- Header superior de ancho completo -->
     <Header v-if="authStore.isAuthenticated" />
 

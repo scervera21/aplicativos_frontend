@@ -10,14 +10,14 @@ const loggingOut = ref(false);
 
 const handleLogout = async () => {
   const result = await Swal.fire({
-    title: '¿Cerrar sesión?',
+    title: '¿Seguro?',
     text: 'Se finalizará la sesión actual.',
     icon: 'question',
     showCancelButton: true,
     confirmButtonColor: '#3085d6',
     cancelButtonColor: '#d33',
-    confirmButtonText: 'Sí, cerrar sesión',
-    cancelButtonText: 'Cancelar'
+    confirmButtonText: 'Cerrar sesión',
+    cancelButtonText: 'Volver'
   })
 
   if (result.isConfirmed) {
