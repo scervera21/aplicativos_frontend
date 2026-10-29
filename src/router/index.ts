@@ -20,13 +20,13 @@ const router = createRouter({
       path: '/users',
       name: 'users',
       component: () => import('@/views/Usuarios.vue'),
-      meta: { requiresAuth: true, permission: 'acceder_usuarios' },
+      meta: { requiresAuth: true, permission: '' },
     },
     {
       path: '/aplicativos',
       name: 'aplicativos',
       component: () => import('@/views/Aplicativos.vue'),
-      meta: { requiresAuth: true, permission: 'acceder_aplicativos'},
+      meta: { requiresAuth: true, permission: ''},
     },
     {
       path: '/:pathMatch(.*)*',
@@ -46,6 +46,7 @@ router.beforeEach((to, _from) => {
   }
   // Si la ruta requiere un permiso específico y el usuario no lo tiene
   else if (to.meta.permission && !authStore.userPermissions.includes(to.meta.permission as string)) {
+    alert('No posee los permisos para acceder a este módulo')
     return { name: 'dashboard' };
   } else {
     return true;

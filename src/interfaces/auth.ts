@@ -2,8 +2,6 @@
 export interface Permission {
   id: number;
   name: string;
-  category: 'access' | 'action';
-  module: string;
   status: boolean;
 }
 
@@ -34,8 +32,5 @@ export interface JwtPayload {
   exp?: number;
   username: string;
   email: string;
-  permissions?: {
-    access: string[];
-    actions: string[];
-  }
+  permissions?: Permission[]
 }

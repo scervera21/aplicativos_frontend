@@ -33,6 +33,7 @@ async function handleLogin() {
     }
   } catch (error) {
     console.error('Fallo en autenticación:', error)
+    Swal.fire('Error', 'Credenciales incorrectas.', 'error');
   } finally {
     isLoading.value = false;
   }
