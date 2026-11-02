@@ -1,56 +1,70 @@
 import { type AxiosError } from 'axios'
-import { useAuthStore } from '@/stores/authStore'
-import router from '@/router'
 import Swal from 'sweetalert2'
 
-const handleRequest = (error: AxiosError) => {
-
-    if (!error.response) {
-      if (error.code === 'ECONNABORTED') {
-        Swal.fire('Tiempo de Espera Agotado', 'La solicitud excedió el tiempo de espera. Por favor, intenta nuevamente.', 'error')
-      } else {
-        Swal.fire('Error de Conexión', 'No se pudo establecer conexión con el servidor.', 'error')
-
-        // Cierre de sesión seguro en el frontend si había un usuario autenticado.
-        const authStore = useAuthStore()
-        if(authStore.isAuthenticated) {
-          authStore.logout()
-        }
-      }
-      return
-    }
+export function handleRequest(error: AxiosError): string {
   
-    const status = error.response.status
-    const data = error.response.data
-    const errorMessage = (data as any)?.message || 'Ocurrió un error inesperado.'
+  let message = ''
+
+  // Manejo de Errores de Red (sin respuesta del servidor)
+  if (!error.response) {
+    if (error.code === 'ECONNABORTED') {
+      message = 'Tiempo de Espera Agotado: La petición tardó demasiado. Intente nuevamente.'
+    } else {
+      // ERR_CONNECTION_REFUSED o pérdida total de conexión
+      message = 'Error de Red: No se pudo conectar con el servidor.'
+    }
+  }
+  else {
+    const status = error.response.status;
+    const data: any = error.response.data;
 
     switch (status) {
       case 400:
-        Swal.fire('Solicitud Incorrecta', errorMessage, 'error')
-        break
+        message = data.message || 'Solicitud incorrecta';
+        break;
       case 401:
-        Swal.fire('No Autorizado', errorMessage, 'error')
-        break
+        message = 'Sesión expirada o credenciales inválidas. Por favor, inicia sesión nuevamente';
+        // Limpieza de credenciales locales
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        if (window.location.pathname !== '/auth/login') {
+          window.location.href = '/auth/login';
+        }
+        break;
       case 403:
-        Swal.fire('Prohibido', errorMessage || 'No posee los permisos requeridos', 'error')
-        router.push('/dashboard')
-        break
+        message = 'Acceso denegado. No posee los permisos requeridos para realizar esta acción';
+        break;
       case 404:
-        Swal.fire('No encontrado', errorMessage || 'El recurso solicitado no existe.', 'error')
-        break
-      case 422:
-        Swal.fire('Error de Validación', errorMessage, 'error')
-        break
+        message = data.message || 'Recurso no encontrado';
+        break;
+      // case 422:
+      //   // Manejo específico para los errores de validación (FormRequests)
+      //   if (data.errors) {
+      //     const erroresArray = Object.values(data.errors).flat() as string[];
+      //     message = erroresArray.join(' ');
+      //   } else {
+      //     message = data.message || 'Error de validación en los datos enviados';
+      //   }
+      //   break;
       case 423:
-        Swal.fire('Bloqueado', errorMessage || 'Su cuenta ha sido bloqueada por intentos fallidos', 'error')
-        break
+        // Bloqueo por intentos de inicio de sesión fallidos
+        message = data.message || 'Su cuenta ha sido bloqueada por intentos fallidos';
+        break;
       case 500:
-        Swal.fire('Error de Servidor', errorMessage || 'Ocurrió un problema en el servidor. Inténtalo más tarde.', 'error')
-        break
+        message = data.message || 'Error interno del servidor. Intentelo más tarde';
+        break;
       default:
-        alert(`Error ${status}: ${errorMessage}`)        
+        message = data.message || `Ocurrió un error inesperado (${status})`;
         break
     }
-}
+  }
 
-export default handleRequest
+  Swal.fire({
+    icon: 'error',
+    text: message,
+    confirmButtonColor: '#3085d6',
+    confirmButtonText: 'Aceptar',
+  })
+
+  return message
+}
