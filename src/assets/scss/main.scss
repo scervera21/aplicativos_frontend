@@ -1,28 +1,27 @@
-
 // Abstracts — no CSS output, just tools (must come first)
 @use 'abstracts/variables';
 @use 'abstracts/mixins';
 
 // Base — global defaults
 @use 'base/reset';
-@use 'base/typography';
 
 // Layout — structural components
 @use 'layout/header';
 @use 'layout/sidebar';
-@use 'layout/footer';
+@use 'layout/layout.scss';
 
 // Components — reusable UI elements
 @use 'components/buttons';
-@use 'components/forms';
+@use 'components/modals.scss';
 
 // Pages — page-specific styles
 @use 'pages/login';
 
-// Themes — theme overrides
-@use 'themes/dark';
-
-// Vendors — third-party overrides
-@use 'vendors/sweetalert';
-
 @import "tailwindcss";
+
+// Estilos globales de la SPA basados en la paleta institucional
+body {
+  background-color: $color-bg-main;
+  color: $color-primary-dark;
+  font-family: $font-family-base;
+}

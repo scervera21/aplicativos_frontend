@@ -1,0 +1,14 @@
+// Etiquetas HTML nativas y resets globales
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: $color-bg-main;
+  color: $color-primary-dark;
+  font-family: $font-family-base;
+  -webkit-font-smoothing: antialiased;
+}

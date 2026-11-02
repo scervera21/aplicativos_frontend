@@ -1,0 +1,10 @@
+.app-header {
+  height: 4rem;
+  background-color: #ffffff;
+  border-bottom: 1px solid $color-primary-light;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}

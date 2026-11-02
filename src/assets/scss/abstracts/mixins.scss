@@ -1,0 +1,8 @@
+// Funciones reutilizables
+
+@import 'variables';
+
+// Mixin para aplicar el fondo degradado del login
+@mixin bg-login-gradient {
+  background: linear-gradient(135deg, $color-accent-purple 0%, $color-accent-blue 100%);
+}
