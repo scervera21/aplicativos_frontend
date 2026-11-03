@@ -24,27 +24,22 @@ export const useAuthStore = defineStore('auth', () => {
   // ==========================================
 
   // Iniciar sesión consumiendo el endpoint de la API de Laravel
-  async function login(credentials: { username: string; password: string }): Promise<boolean> {
-    try {
-      const response = await apiClient.post('/auth/login', credentials);
-      const data = response.data.data;
+  async function login(credentials: { username: string; password: string }): Promise<void> {
+    const response = await apiClient.post('/auth/login', credentials);
+    const data = response.data.data;
+    const userData = data.user || data.usuario;
 
-      // Actualizamos el estado reactivo
-      token.value = data.token;
-      user.value = data.usuario;
-      roles.value = data.usuario.roles || [];
-      permissions.value = data.usuario.permissions || [];
+    // Actualizamos el estado reactivo
+    token.value = data.token;
+    user.value = userData;
+    roles.value = userData?.roles || [];
+    permissions.value = userData?.permissions || [];
 
-      // Guardamos en el LocalStorage del navegador para persistencia
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.usuario));
-      localStorage.setItem('roles', JSON.stringify(roles.value));
-      localStorage.setItem('permissions', JSON.stringify(permissions.value));
-
-      return true;
-    } catch (error) {
-      return false;
-    }
+    // Guardamos en el LocalStorage del navegador para persistencia
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('roles', JSON.stringify(roles.value));
+    localStorage.setItem('permissions', JSON.stringify(permissions.value));
   }
 
   // Obtener el perfil actualizado del usuario autenticado (Endpoint /me)

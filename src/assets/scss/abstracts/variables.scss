@@ -1,10 +1,8 @@
-// Colores y tipografia base
-
-$color-primary-dark: #032C49;
-$color-primary-light: #BDCEE5;
-$color-bg-main: #F4F1FA;
-$color-accent-purple: #81299A;
-$color-accent-blue: #322CAB;
-
-// Tipografía y otros tokens globales
-$font-family-base: 'Inter', sans-serif;
+:root {
+  --color-primary-dark: #032C49;
+  --color-light-gray: #BDCEE5;
+  --color-bg-main: #F4F1FA;
+  --color-purple: #81299A;
+  --color-royal-blue: #322CAB;
+  --font-family-base: 'Inter', sans-serif;
+}

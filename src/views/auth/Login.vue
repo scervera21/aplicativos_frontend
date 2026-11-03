@@ -53,7 +53,7 @@ const handleLogin = async () => {
     });
 
     // Redirección segura al Dashboard principal
-    router.push({ name: 'dashboard' });
+    router.push({ name: 'Dashboard' });
 
   } catch (error: any) {
     const errorMessage = error.response?.data?.message || 'Credenciales inválidas o error de conexión con el servidor.';

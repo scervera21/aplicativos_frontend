@@ -1,25 +1,35 @@
 <script setup lang="ts">
-  import { RouterView } from 'vue-router';
-  import { useAuthStore } from './stores/authStore';
-  import Sidebar from './components/layout/Sidebar.vue';
-  import Header from './components/layout/Header.vue';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+import Sidebar from '@/components/layout/Sidebar.vue';
+import Header from '@/components/layout/Header.vue';
 
-  const authStore = useAuthStore()
+const route = useRoute();
+
+// Determinar si la ruta actual es una página limpia (ej. Login) sin layout principal
+const isAuthRoute = computed(() => route.meta.requiresGuest === true || route.name === 'Login');
 </script>
 
 <template>
-  <div id="app" class="min-h-screen flex flex-col bg-[#d6d2da] antialiased font-sans">
-    <!-- Header superior de ancho completo -->
-    <Header v-if="authStore.isAuthenticated" />
+  <!-- Vista para páginas de autenticación / públicas (sin Sidebar ni Header) -->
+  <template v-if="isAuthRoute">
+    <RouterView />
+  </template>
 
-    <!-- Contenedor inferior: Sidebar lateral + Contenido dinámico (router-view) -->
-    <div class="flex flex-1 overflow-hidden">
-      <Sidebar v-if="authStore.isAuthenticated" />
+  <!-- Layout principal para la aplicación autenticada -->
+  <div v-else class="app-layout">
+    <!-- Barra lateral de navegación con control de permisos -->
+    <Sidebar />
 
-      <!-- Área dinámica de las vistas con scroll independiente -->
-      <div class="flex-1 overflow-y-auto">
+    <!-- Contenedor derecho principal -->
+    <div class="main-content">
+      <!-- Encabezado superior con perfil y cierre de sesión -->
+      <Header />
+
+      <!-- Área dinámica donde se renderizan las vistas de los módulos -->
+      <main class="flex-1 p-6 overflow-y-auto">
         <RouterView />
-      </div>
+      </main>
     </div>
   </div>
 </template>

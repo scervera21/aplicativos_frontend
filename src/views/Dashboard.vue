@@ -1,169 +1,96 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import apiClient from '@/plugins/axios'
-import { useAuthStore } from '@/stores/authStore'
+import { computed } from 'vue';
+import { useAuthStore } from '@/stores/authStore';
+import { UserCircleIcon, EnvelopeIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline';
 
-const authStore = useAuthStore()
-const testingAction = ref(false)
-const testResult = ref<string | null>(null)
-
-const testRefresh = async () => {
-  testingAction.value = true
-  testResult.value = null
-  try {
-    const response = await apiClient.post('/v1/auth/refresh')
-    authStore.saveNewToken(response.data.token, response.data.expires_in)
-    testResult.value = JSON.stringify(response.data, null, 2)
-    alert('¡Token renovado con éxito desde Laravel!')
-  } catch (error) {
-    console.error('Fallo en prueba de refresh:', error)
-  } finally {
-    testingAction.value = false
-  }
-}
-
-const testMe = async () => {
-  testingAction.value = true
-  testResult.value = null
-  try {
-    const response = await apiClient.get('/v1/auth/me')
-    testResult.value = JSON.stringify(response.data, null, 2)
-    alert(`¡Perfil verificado: ${response.data.first_name} ${response.data.last_name}!`)
-  } catch (error) {
-    console.error('Fallo en consulta de perfil:', error)
-  } finally {
-    testingAction.value = false
-  }
-}
+const authStore = useAuthStore();
+const currentUser = computed(() => authStore.user);
+const userRoles = computed(() => authStore.roles);
+const userPermissions = computed(() => authStore.permissions);
 </script>
 
 <template>
-    <!-- Contenido Principal -->
-    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      <!-- Tarjeta de Bienvenida y Estado de Sesión -->
-      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <h1 class="text-2xl font-extrabold text-white">
-              ¡Bienvenido, {{ authStore.user?.first_name }}! 👋
-            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              {{ authStore.user?.status === true ? 'Activo' : 'Inactivo' }}
+  <div class="space-y-6">
+    <!-- Encabezado de Bienvenida -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-[#BDCEE5]/40 flex items-center gap-4">
+      <div class="p-3 bg-[#F4F1FA] rounded-full text-[#81299A]">
+        <UserCircleIcon class="h-12 w-12" />
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold text-[#032C49]">
+          ¡Bienvenido de nuevo, {{ currentUser?.username || 'Usuario' }}!
+        </h1>
+        <p class="text-sm text-gray-500">
+          Has iniciado sesión correctamente en el Sistema de Gestión y Seguimiento de Aplicativos.
+        </p>
+      </div>
+    </div>
+
+    <!-- Tarjetas de Información del Perfil -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Datos Personales / Cuenta -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-[#BDCEE5]/40 space-y-4">
+        <h3 class="text-lg font-bold text-[#032C49] border-b pb-2 flex items-center gap-2">
+          <UserCircleIcon class="h-5 w-5 text-[#81299A]" />
+          Información de la Cuenta
+        </h3>
+        
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between">
+            <span class="font-semibold text-gray-600">Nombre de Usuario:</span>
+            <span class="text-[#032C49] font-medium">{{ currentUser?.username }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="font-semibold text-gray-600 flex items-center gap-1">
+              <EnvelopeIcon class="h-4 w-4 text-gray-400" /> Correo:
             </span>
-            </h1>
+            <span class="text-[#032C49]">{{ currentUser?.email }}</span>
           </div>
         </div>
       </div>
 
-      <!-- Cuadrícula de Información -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Tarjeta: Datos del Usuario -->
-        <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl space-y-4">
-          <h2 class="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-700 pb-3">
-            <svg class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            Información de la Cuenta
-          </h2>
-
-          <div class="space-y-3 text-sm">
-            <div class="flex justify-between py-1 border-b border-slate-700/50">
-              <span class="text-slate-400">ID:</span>
-              <span class="font-mono font-semibold text-white">#{{ authStore.user?.id }}</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-700/50">
-              <span class="text-slate-400">Nombre Completo:</span>
-              <span class="font-semibold text-white">{{ authStore.user?.first_name }} {{ authStore.user?.last_name }}</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-700/50">
-              <span class="text-slate-400">Usuario:</span>
-              <span class="font-mono text-indigo-300">@{{ authStore.user?.username }}</span>
-            </div>
-            <div class="flex justify-between py-1 border-b border-slate-700/50">
-              <span class="text-slate-400">Correo Electrónico:</span>
-              <span class="text-white">{{ authStore.user?.email }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Tarjeta: Roles y Permisos Spatie -->
-        <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl space-y-4">
-          <h2 class="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-700 pb-3">
-            <svg class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            Roles y Permisos
-          </h2>
-
-          <!-- Lista de Roles -->
-          <div>
-            <p class="text-xs uppercase tracking-wider font-bold text-slate-400 mb-2">Roles Asignados:</p>
-            <div class="flex flex-wrap gap-2">
-              <span
-                v-for="role in authStore.user?.roles"
-                :key="role.id"
-                class="px-2.5 py-1 text-xs font-semibold rounded-lg bg-indigo-500/10 text-indigo-300 border border-indigo-500/20"
-              >
-                {{ role.name }}
-              </span>
-              <span v-if="!authStore.user?.roles?.length" class="text-xs text-slate-500 italic">
-                Sin roles
-              </span>
-            </div>
-          </div>
-
-          <!-- Lista de Permisos -->
-          <div class="pt-2">
-            <p class="text-xs uppercase tracking-wider font-bold text-slate-400 mb-2">
-              Permisos ({{ authStore.userPermissions.length }}):
-            </p>
-            <div class="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pr-1">
-              <span
-                v-for="perm in authStore.userPermissions"
-                :key="perm"
-                class="px-2 py-0.5 text-xs font-mono rounded bg-slate-900/60 text-slate-300 border border-slate-700"
-              >
-                {{ perm }}
-              </span>
-              <span v-if="!authStore.userPermissions.length" class="text-xs text-slate-500 italic">
-                Sin permisos
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Panel de Pruebas de Endpoints de Laravel -->
-      <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 shadow-xl space-y-4">
-        <h2 class="text-lg font-bold text-white flex items-center gap-2 border-b border-slate-700 pb-3">
-          <svg class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-          </svg>
-          Pruebas de Conexión con Laravel API
-        </h2>
-
-        <div class="flex flex-wrap gap-3">
-          <button
-            @click="testRefresh"
-            :disabled="testingAction"
-            class="px-4 py-2 text-sm font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-50 transition shadow-md shadow-indigo-600/20"
+      <!-- Roles Asignados (Spatie) -->
+      <div class="bg-white p-6 rounded-xl shadow-sm border border-[#BDCEE5]/40 space-y-4">
+        <h3 class="text-lg font-bold text-[#032C49] border-b pb-2 flex items-center gap-2">
+          <ShieldCheckIcon class="h-5 w-5 text-[#81299A]" />
+          Roles Asignados
+        </h3>
+        
+        <div class="flex flex-wrap gap-2">
+          <span
+            v-for="role in userRoles"
+            :key="role"
+            class="px-3 py-1 bg-[#F4F1FA] text-[#81299A] border border-[#81299A]/30 rounded-full text-xs font-semibold"
           >
-            🔄 Refrescar Token
-          </button>
-
-          <button
-            @click="testMe"
-            :disabled="testingAction"
-            class="px-4 py-2 text-sm font-semibold rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 disabled:opacity-50 transition border border-slate-600"
-          >
-            👤 Consultar Perfil
-          </button>
-        </div>
-
-        <div v-if="testResult" class="mt-4 p-4 rounded-xl bg-slate-900/80 border border-slate-700">
-          <p class="text-xs uppercase font-bold text-slate-400 mb-1">Respuesta del Servidor:</p>
-          <pre class="text-xs font-mono text-emerald-400 overflow-x-auto">{{ testResult }}</pre>
+            {{ role }}
+          </span>
+          <span v-if="!userRoles.length" class="text-sm text-gray-400 italic">
+            Sin roles asignados
+          </span>
         </div>
       </div>
-    </main>
+
+    </div>
+
+    <!-- Permisos del Sistema -->
+    <div class="bg-white p-6 rounded-xl shadow-sm border border-[#BDCEE5]/40 space-y-4">
+      <h3 class="text-lg font-bold text-[#032C49] border-b pb-2">
+        Permisos Activos en tu Sesión
+      </h3>
+      <div class="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-2 bg-[#F4F1FA]/40 rounded-lg">
+        <span
+          v-for="permission in userPermissions"
+          :key="permission"
+          class="px-2.5 py-1 bg-white text-[#032C49] border border-[#BDCEE5] rounded text-xs font-mono shadow-xs"
+        >
+          {{ permission }}
+        </span>
+        <span v-if="!userPermissions.length" class="text-sm text-gray-400 italic">
+          No hay permisos registrados en el token.
+        </span>
+      </div>
+    </div>
+
+  </div>
 </template>
