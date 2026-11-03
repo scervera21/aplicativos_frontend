@@ -1,3 +1,6 @@
+//TailwindCss
+@import "tailwindcss";
+
 // Abstracts — no CSS output, just tools (must come first)
 @use 'abstracts/variables';
 @use 'abstracts/mixins';
@@ -8,16 +11,14 @@
 // Layout — structural components
 @use 'layout/header';
 @use 'layout/sidebar';
-@use 'layout/layout.scss';
+@use 'layout/layout';
 
 // Components — reusable UI elements
 @use 'components/buttons';
-@use 'components/modals.scss';
+@use 'components/modals';
 
 // Pages — page-specific styles
 @use 'pages/login';
-
-@import "tailwindcss";
 
 // Estilos globales de la SPA basados en la paleta institucional
 body {

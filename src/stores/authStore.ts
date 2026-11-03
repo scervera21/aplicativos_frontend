@@ -14,7 +14,14 @@ export const useAuthStore = defineStore('auth', () => {
   const roles = ref<string[]>(JSON.parse(localStorage.getItem('roles') || '[]'));
   const permissions = ref<string[]>(JSON.parse(localStorage.getItem('permissions') || '[]'));
 
+  // ======================================== 
+  // GETTERS (Computed Propertiections)
+  // ==========================================
   const isAuthenticated = computed(() => !!token.value);
+
+  // ==========================================
+  // ACCIONES (Actions)
+  // ==========================================
 
   // Iniciar sesión consumiendo el endpoint de la API de Laravel
   async function login(credentials: { username: string; password: string }): Promise<boolean> {
