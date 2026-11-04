@@ -28,6 +28,6 @@ export interface User {
     nombre_gerencia: string;
     sigla: string;
   };
-  roles?: Role[]; 
-  permissions?: string[];
+  roles?: (Role | string)[]; 
+  permissions?: (Permission | string)[];
 }

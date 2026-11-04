@@ -36,7 +36,7 @@ const router = createRouter({
       path: '/gerencias',
       name: 'Gerencias',
       component: () => import('@/views/Gerencias.vue'),
-      meta: { requiresAuth: true , requiredModule: 'Gerencias'},
+      meta: { requiresAuth: true, permission: 'ver.gerencias' },
     },
     {
       path: '/roles',

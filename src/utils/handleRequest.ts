@@ -27,8 +27,10 @@ export function handleRequest(error: AxiosError): string {
         // Limpieza de credenciales locales
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        if (window.location.pathname !== '/auth/login') {
-          window.location.href = '/auth/login';
+        localStorage.removeItem('roles');
+        localStorage.removeItem('permissions');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
         }
         break;
       case 403:

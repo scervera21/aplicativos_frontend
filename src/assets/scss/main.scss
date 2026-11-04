@@ -17,9 +17,6 @@
 // Pages — page-specific styles
 @use 'pages/login';
 
-// TailwindCss (lo colocamos temprano para que reconozca la base si es necesario)
-@import "tailwindcss";
-
 // Estilos globales de la SPA basados en la paleta institucional
 body {
   background-color: var(--color-bg-main);

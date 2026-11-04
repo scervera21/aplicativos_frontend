@@ -10,6 +10,7 @@ const authStore = useAuthStore();
 
 // Obtener los datos del usuario autenticado desde el store
 const currentUser = computed(() => authStore.user);
+const primaryRole = computed(() => authStore.roles[0] || 'Colaborador');
 
 // Manejador del cierre de sesión
 const handleLogout = async () => {
@@ -48,8 +49,8 @@ const handleLogout = async () => {
         <h2 class="text-sm font-bold text-[#032C49]">
           Bienvenido, {{ currentUser?.username || 'Usuario' }}
         </h2>
-        <p class="text-xs text-gray-500">
-          {{ currentUser?.roles?.[0] || 'Colaborador' }}
+        <p class="text-xs text-gray-500 capitalize">
+          {{ primaryRole }}
         </p>
       </div>
     </div>
