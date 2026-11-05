@@ -2,7 +2,12 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/authStore';
-import { ArrowLeftOnRectangleIcon, UserCircleIcon } from '@heroicons/vue/24/outline';
+import {
+  ArrowLeftOnRectangleIcon,
+  UserCircleIcon,
+  BellIcon,
+  MagnifyingGlassIcon
+} from '@heroicons/vue/24/outline';
 import Swal from 'sweetalert2';
 
 const router = useRouter();
@@ -41,34 +46,48 @@ const handleLogout = async () => {
 </script>
 
 <template>
-  <header class="app-header">
-    <!-- Saludo / Bienvenida al Usuario -->
-    <div class="flex items-center gap-3">
-      <UserCircleIcon class="h-8 w-8 text-[#81299A]" />
-      <div>
-        <h2 class="text-sm font-bold text-[#032C49]">
-          Bienvenido, {{ currentUser?.username || 'Usuario' }}
-        </h2>
-        <p class="text-xs text-gray-500 capitalize">
-          {{ primaryRole }}
-        </p>
-      </div>
-    </div>
-
-    <!-- Acciones del Header (Cerrar Sesión) -->
+  <header class="app-header px-6 py-3.5 bg-white border-b border-[#BDCEE5]/50 flex items-center justify-end shadow-2xs">
+    <!-- Acciones y Perfil del Usuario alineados a la derecha -->
     <div class="flex items-center gap-4">
+      <!-- Notificaciones -->
+      <!-- <button
+        class="relative p-2 rounded-xl text-gray-500 hover:text-[#032C49] hover:bg-[#F4F1FA] transition-colors cursor-pointer"
+        title="Notificaciones"
+      >
+        <BellIcon class="h-5 w-5" />
+        <span class="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-[#81299A] ring-2 ring-white" />
+      </button> -->
+
+      <!-- <div class="h-6 w-px bg-[#BDCEE5]/50 hidden sm:block" /> -->
+
+      <!-- Saludo / Bienvenida al Usuario -->
+      <div class="flex items-center gap-3">
+        <div class="p-1 rounded-full bg-[#F4F1FA] text-[#81299A]">
+          <UserCircleIcon class="h-8 w-8" />
+        </div>
+        <div class="hidden sm:block text-left">
+          <h2 class="text-xs font-bold text-[#032C49] leading-tight">
+            {{ currentUser?.username || 'Usuario' }}
+          </h2>
+          <p class="text-[11px] text-gray-500 capitalize leading-tight">
+            {{ primaryRole }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Acciones del Header (Cerrar Sesión) -->
       <button
         @click="handleLogout"
-        class="flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+        class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
         title="Cerrar sesión"
       >
-        <ArrowLeftOnRectangleIcon class="h-5 w-5" />
-        <span class="hidden sm:inline">Salir</span>
+        <ArrowLeftOnRectangleIcon class="h-4 w-4" />
+        <span class="hidden md:inline">Salir</span>
       </button>
     </div>
   </header>
 </template>
 
 <style scoped>
-/* Los estilos base del header ya están integrados en _header.scss */
+/* Los estilos estructurales macro están respaldados en _header.scss */
 </style>

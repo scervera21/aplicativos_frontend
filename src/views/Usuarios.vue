@@ -5,13 +5,15 @@ import { useAuthStore } from '@/stores/authStore';
 import type { User, Role } from '@/interfaces/User';
 import type { Gerencia } from '@/interfaces/Gerencia';
 import Modal from '@/components/layout/Modal.vue';
+import ModuleHeader from '@/components/common/ModuleHeader.vue';
+import AdvancedDataTable from '@/components/common/datatable/AdvancedDataTable.vue';
+import type { DataTableColumn, DataTableFeatures } from '@/composables/useDataTable';
 import Swal from 'sweetalert2';
 import {
   UsersIcon,
   UserPlusIcon,
   PencilSquareIcon,
   TrashIcon,
-  MagnifyingGlassIcon,
   ArrowPathIcon
 } from '@heroicons/vue/24/outline';
 
@@ -46,17 +48,36 @@ const form = ref({
 // Permiso para crear/editar/eliminar
 const canManage = computed(() => authStore.hasPermission('gestionar.usuarios'));
 
-// Filtrar usuarios en base al buscador
-const filteredUsers = computed(() => {
-  if (!searchQuery.value.trim()) return users.value;
-  const q = searchQuery.value.toLowerCase();
-  return users.value.filter(u =>
-    u.username.toLowerCase().includes(q) ||
-    u.first_name.toLowerCase().includes(q) ||
-    u.last_name.toLowerCase().includes(q) ||
-    u.email.toLowerCase().includes(q) ||
-    (u.gerencia?.nombre_gerencia || '').toLowerCase().includes(q)
-  );
+// Configuración de columnas del DataTable según la Skill
+const tableColumns = ref<DataTableColumn[]>([
+  { key: 'id', label: 'ID', sortable: true, width: 'w-20' },
+  { key: 'username', label: 'Usuario', sortable: true },
+  { key: 'full_name', label: 'Nombre Completo', sortable: true },
+  { key: 'email', label: 'Email', sortable: true },
+  { key: 'gerencia', label: 'Gerencia', sortable: true },
+  { key: 'roles', label: 'Rol', sortable: false },
+  { key: 'is_active', label: 'Estado', sortable: true },
+  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-28' },
+]);
+
+// Características avanzadas del DataTable
+const tableFeatures: DataTableFeatures = {
+  searchable: true,
+  columnVisibility: true,
+  exportExcel: true,
+  selectable: true,
+  pagination: true,
+  dateRangeFilter: false,
+  pageSizes: [10, 25, 50, 100],
+};
+
+// Datos transformados para facilitar el filtrado y ordenamiento del composable
+const tableUsers = computed(() => {
+  return users.value.map(u => ({
+    ...u,
+    full_name: `${u.first_name || ''} ${u.last_name || ''}`.trim(),
+    gerencia_nombre: u.gerencia?.sigla || u.gerencia?.nombre_gerencia || 'Sin gerencia',
+  }));
 });
 
 // ==========================================
@@ -242,24 +263,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <!-- Encabezado del Módulo -->
-    <div class="bg-white p-6 rounded-xl shadow-sm border border-[#BDCEE5]/40 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div class="flex items-center gap-4">
-        <div class="p-3 bg-[#F4F1FA] rounded-full text-[#81299A]">
-          <UsersIcon class="h-8 w-8" />
-        </div>
-        <div>
-          <h1 class="text-2xl font-bold text-[#032C49]">Gestión de Usuarios</h1>
-          <p class="text-sm text-gray-500">Administra cuentas, roles asignados y estados de los usuarios.</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-3">
+  <div class="space-y-6 md:space-y-8">
+    <!-- Encabezado del Módulo (Estandarizado con ModuleHeader) -->
+    <ModuleHeader
+      title="Gestión de Usuarios"
+      subtitle="Administra cuentas, roles asignados y estados de los usuarios del sistema."
+      :icon="UsersIcon"
+    >
+      <template #actions>
         <button
           @click="fetchUsers"
           :disabled="loading"
-          class="p-2.5 rounded-lg border border-[#BDCEE5]/60 hover:bg-[#F4F1FA] text-[#032C49] transition-colors cursor-pointer"
+          class="p-2.5 rounded-xl border border-[#BDCEE5]/60 hover:bg-[#F4F1FA] text-[#032C49] transition-colors cursor-pointer"
           title="Actualizar lista"
         >
           <ArrowPathIcon class="h-5 w-5" :class="{ 'animate-spin': loading }" />
@@ -268,113 +283,79 @@ onMounted(async () => {
         <button
           v-if="canManage"
           @click="openCreateModal"
-          class="btn-primary inline-flex items-center gap-2 cursor-pointer text-sm"
+          class="btn-primary inline-flex items-center gap-2 cursor-pointer text-sm shadow-xs"
         >
           <UserPlusIcon class="h-5 w-5" />
           <span>Nuevo Usuario</span>
         </button>
-      </div>
-    </div>
+      </template>
+    </ModuleHeader>
 
-    <!-- Barra de Búsqueda y Filtros -->
-    <div class="bg-white p-4 rounded-xl shadow-sm border border-[#BDCEE5]/40 flex items-center justify-between gap-4">
-      <div class="relative flex-1 max-w-md">
-        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-          <MagnifyingGlassIcon class="h-5 w-5" />
+    <!-- Componente DataTable Avanzado según la Skill -->
+    <AdvancedDataTable
+      :data="tableUsers"
+      :columns="tableColumns"
+      :features="tableFeatures"
+      :loading="loading"
+      export-file-name="usuarios_sistema"
+      empty-text="No hay usuarios registrados que coincidan con la búsqueda."
+    >
+      <!-- Slot personalizado: ID con estilo mono -->
+      <template #cell-id="{ value }">
+        <span class="font-mono text-xs text-gray-500">#{{ value }}</span>
+      </template>
+
+      <!-- Slot personalizado: Nombre de Usuario destacado -->
+      <template #cell-username="{ value }">
+        <span class="font-semibold text-[#032C49]">{{ value }}</span>
+      </template>
+
+      <!-- Slot personalizado: Gerencia -->
+      <template #cell-gerencia="{ row }">
+        <span v-if="row.gerencia" class="px-2.5 py-1 rounded-lg text-xs bg-gray-100 text-[#032C49] font-medium border border-gray-200">
+          {{ row.gerencia.sigla || row.gerencia.nombre_gerencia }}
         </span>
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Buscar por usuario, nombre, email o gerencia..."
-          class="w-full pl-10 pr-4 py-2 border border-[#BDCEE5]/60 rounded-lg text-sm text-[#032C49] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#81299A]/50 bg-[#F4F1FA]/30"
-        />
-      </div>
-      <div class="text-xs text-gray-500">
-        Total: <span class="font-bold text-[#032C49]">{{ filteredUsers.length }}</span> usuarios
-      </div>
-    </div>
+        <span v-else class="text-xs text-gray-400 italic">Sin gerencia</span>
+      </template>
 
-    <!-- Tabla Principal de Usuarios -->
-    <div class="bg-white rounded-xl shadow-sm border border-[#BDCEE5]/40 overflow-hidden">
-      <!-- Indicador de Carga -->
-      <div v-if="loading" class="p-12 text-center text-gray-500 space-y-3">
-        <div class="inline-block animate-spin text-2xl text-[#81299A]">⏳</div>
-        <p class="text-sm">Cargando usuarios desde el servidor...</p>
-      </div>
+      <!-- Slot personalizado: Roles -->
+      <template #cell-roles="{ value }">
+        <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-[#F4F1FA] text-[#81299A] border border-[#81299A]/20">
+          {{ formatRoles(value) }}
+        </span>
+      </template>
 
-      <!-- Estado Vacío -->
-      <div v-else-if="filteredUsers.length === 0" class="p-12 text-center text-gray-500 space-y-2">
-        <p class="text-base font-semibold text-[#032C49]">No se encontraron usuarios</p>
-        <p class="text-xs">No hay registros que coincidan con los criterios de búsqueda.</p>
-      </div>
+      <!-- Slot personalizado: Estado -->
+      <template #cell-is_active="{ value }">
+        <span
+          class="px-2.5 py-0.5 rounded-full text-xs font-semibold"
+          :class="value ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'"
+        >
+          {{ value ? 'Activo' : 'Inactivo' }}
+        </span>
+      </template>
 
-      <!-- Tabla Semántica Tailwind -->
-      <div v-else class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-[#F4F1FA] text-[#032C49] uppercase text-xs font-bold border-b border-[#BDCEE5]/40">
-            <tr>
-              <th class="px-6 py-3.5">ID</th>
-              <th class="px-6 py-3.5">Usuario</th>
-              <th class="px-6 py-3.5">Nombre Completo</th>
-              <th class="px-6 py-3.5">Email</th>
-              <th class="px-6 py-3.5">Gerencia</th>
-              <th class="px-6 py-3.5">Rol</th>
-              <th class="px-6 py-3.5">Estado</th>
-              <th v-if="canManage" class="px-6 py-3.5 text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[#BDCEE5]/30">
-            <tr
-              v-for="u in filteredUsers"
-              :key="u.id"
-              class="hover:bg-[#F4F1FA]/40 transition-colors"
-            >
-              <td class="px-6 py-4 font-mono text-xs text-gray-500">#{{ u.id }}</td>
-              <td class="px-6 py-4 font-semibold text-[#032C49]">{{ u.username }}</td>
-              <td class="px-6 py-4 text-gray-700">{{ u.first_name }} {{ u.last_name }}</td>
-              <td class="px-6 py-4 text-gray-600">{{ u.email }}</td>
-              <td class="px-6 py-4 text-gray-600">
-                <span v-if="u.gerencia" class="px-2 py-0.5 rounded text-xs bg-gray-100 text-[#032C49] font-medium">
-                  {{ u.gerencia.sigla || u.gerencia.nombre_gerencia }}
-                </span>
-                <span v-else class="text-xs text-gray-400 italic">Sin gerencia</span>
-              </td>
-              <td class="px-6 py-4">
-                <span class="px-2.5 py-1 rounded-full text-xs font-medium bg-[#F4F1FA] text-[#81299A] border border-[#81299A]/20">
-                  {{ formatRoles(u.roles) }}
-                </span>
-              </td>
-              <td class="px-6 py-4">
-                <span
-                  class="px-2 py-0.5 rounded text-xs font-semibold"
-                  :class="u.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-                >
-                  {{ u.is_active ? 'Activo' : 'Inactivo' }}
-                </span>
-              </td>
-              <td v-if="canManage" class="px-6 py-4 text-center">
-                <div class="inline-flex items-center gap-2">
-                  <button
-                    @click="openEditModal(u)"
-                    class="p-1.5 text-[#322CAB] hover:bg-[#F4F1FA] rounded-md transition-colors cursor-pointer"
-                    title="Editar usuario"
-                  >
-                    <PencilSquareIcon class="h-5 w-5" />
-                  </button>
-                  <button
-                    @click="handleDelete(u)"
-                    class="p-1.5 text-red-600 hover:bg-red-50 rounded-md transition-colors cursor-pointer"
-                    title="Eliminar usuario"
-                  >
-                    <TrashIcon class="h-5 w-5" />
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+      <!-- Slot personalizado: Acciones -->
+      <template #cell-acciones="{ row }">
+        <div v-if="canManage" class="inline-flex items-center gap-1.5 justify-center">
+          <button
+            @click="openEditModal(row)"
+            class="p-2 text-[#322CAB] hover:bg-[#F4F1FA] rounded-xl transition-colors cursor-pointer"
+            title="Editar usuario"
+          >
+            <PencilSquareIcon class="h-4 w-4" />
+          </button>
+          <button
+            @click="handleDelete(row)"
+            class="p-2 text-rose-600 hover:bg-rose-50 rounded-xl transition-colors cursor-pointer"
+            title="Eliminar usuario"
+          >
+            <TrashIcon class="h-4 w-4" />
+          </button>
+        </div>
+        <span v-else class="text-xs text-gray-400">—</span>
+      </template>
+    </AdvancedDataTable>
 
     <!-- Modal de Creación / Edición -->
     <Modal
@@ -507,25 +488,18 @@ onMounted(async () => {
             class="h-4 w-4 rounded border-[#BDCEE5] text-[#81299A] focus:ring-[#81299A]"
           />
           <label for="is_active" class="text-sm font-medium text-[#032C49]">
-            Usuario Activo
+            Activo
           </label>
         </div>
 
         <!-- Botones de Acción -->
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#BDCEE5]/40">
           <button
-            type="button"
-            @click="closeModal"
-            class="px-4 py-2 text-sm rounded-lg border border-[#BDCEE5] text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Cancelar
-          </button>
-          <button
             type="submit"
             :disabled="saving"
             class="btn-primary text-sm cursor-pointer disabled:opacity-50"
           >
-            {{ saving ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Crear Usuario') }}
+            {{ saving ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Guardar') }}
           </button>
         </div>
       </form>

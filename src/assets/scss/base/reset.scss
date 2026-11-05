@@ -1,9 +1,6 @@
-// Etiquetas HTML nativas y resets globales
-
+// Etiquetas HTML nativas y ajustes específicos (respetando Preflight de Tailwind)
 *, *::before, *::after {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
 }
 
 body {

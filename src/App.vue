@@ -27,8 +27,10 @@ const isAuthRoute = computed(() => route.meta.requiresGuest === true || route.na
       <Header />
 
       <!-- Área dinámica donde se renderizan las vistas de los módulos -->
-      <main class="flex-1 p-6 overflow-y-auto">
-        <RouterView />
+      <main class="flex-1 p-6 md:p-8 overflow-y-auto">
+        <div class="max-w-7xl mx-auto w-full">
+          <RouterView />
+        </div>
       </main>
     </div>
   </div>

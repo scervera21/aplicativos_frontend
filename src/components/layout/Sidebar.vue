@@ -16,7 +16,7 @@ const authStore = useAuthStore();
 const menuItems = computed(() => [
   {
     name: 'Dashboard',
-    path: '/',
+    path: '/dashboard',
     icon: HomeIcon,
     show: true // Todos los usuarios autenticados pueden ver el dashboard
   },
