@@ -7,6 +7,7 @@ export interface DataTableColumn {
   visible?: boolean;
   width?: string;
   type?: 'text' | 'date' | 'number' | 'custom';
+  align?: 'left' | 'center' | 'right';
 }
 
 export interface DataTableFeatures {

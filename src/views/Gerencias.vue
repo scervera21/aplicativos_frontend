@@ -29,6 +29,7 @@ const saving = ref(false);
 const isModalOpen = ref(false);
 const isEditing = ref(false);
 const editingGerenciaId = ref<number | null>(null);
+const formErrors = ref<Record<string, string[]>>({});
 
 const form = ref({
   nombre_gerencia: '',
@@ -40,10 +41,10 @@ const canManage = computed(() => authStore.hasPermission('gestionar.gerencias') 
 
 // Configuración de Columnas del DataTable según las Skills
 const tableColumns = ref<DataTableColumn[]>([
-  { key: 'id', label: 'ID', sortable: true, width: 'w-24' },
-  { key: 'sigla', label: 'Sigla', sortable: true, width: 'w-44' },
-  { key: 'nombre_gerencia', label: 'Nombre de la Gerencia', sortable: true },
-  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-32' }
+  { key: 'id', label: 'ID', sortable: true, visible: false, width: 'w-24', align: 'center' },
+  { key: 'sigla', label: 'Sigla', sortable: true, width: 'w-36', align: 'center' },
+  { key: 'nombre_gerencia', label: 'Nombre de la Gerencia', sortable: true, align: 'left' },
+  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-32', align: 'center' }
 ]);
 
 const tableFeatures: DataTableFeatures = {
@@ -76,6 +77,7 @@ const fetchGerencias = async () => {
 const openCreateModal = () => {
   isEditing.value = false;
   editingGerenciaId.value = null;
+  formErrors.value = {};
   form.value = {
     nombre_gerencia: '',
     sigla: ''
@@ -86,6 +88,7 @@ const openCreateModal = () => {
 const openEditModal = (item: Gerencia) => {
   isEditing.value = true;
   editingGerenciaId.value = item.id;
+  formErrors.value = {};
   form.value = {
     nombre_gerencia: item.nombre_gerencia,
     sigla: item.sigla
@@ -95,9 +98,11 @@ const openEditModal = (item: Gerencia) => {
 
 const closeModal = () => {
   isModalOpen.value = false;
+  formErrors.value = {};
 };
 
 const handleSubmit = async () => {
+  formErrors.value = {};
   saving.value = true;
   try {
     const payload = {
@@ -128,13 +133,10 @@ const handleSubmit = async () => {
     closeModal();
     await fetchGerencias();
   } catch (error: any) {
-    const msg = error.response?.data?.message || 'Error al procesar la solicitud.';
-    Swal.fire({
-      icon: 'error',
-      title: 'Error al guardar',
-      text: msg,
-      confirmButtonColor: '#032C49'
-    });
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      formErrors.value = error.response.data.errors;
+    }
+    console.error('Error al procesar la gerencia:', error);
   } finally {
     saving.value = false;
   }
@@ -271,8 +273,12 @@ onMounted(async () => {
             required
             maxlength="10"
             placeholder="ej. GGSI, DSI, OTI"
-            class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] uppercase font-mono focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+            class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] uppercase font-mono focus:outline-none focus:ring-2"
+            :class="formErrors.sigla ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
           />
+          <p v-if="formErrors.sigla" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.sigla[0] }}
+          </p>
         </div>
 
         <div>
@@ -285,8 +291,12 @@ onMounted(async () => {
             required
             maxlength="80"
             placeholder="ej. Gerencia General de Seguridad de la Información"
-            class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+            class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+            :class="formErrors.nombre_gerencia ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
           />
+          <p v-if="formErrors.nombre_gerencia" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.nombre_gerencia[0] }}
+          </p>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#BDCEE5]/40">

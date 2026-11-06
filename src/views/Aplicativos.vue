@@ -34,6 +34,7 @@ const saving = ref(false);
 const isModalOpen = ref(false);
 const isEditing = ref(false);
 const editingAplicativoId = ref<number | null>(null);
+const formErrors = ref<Record<string, string[]>>({});
 
 // Modal Secundario (Ficha Técnica / Información Técnica)
 const isDetailsModalOpen = ref(false);
@@ -52,7 +53,7 @@ const form = ref({
   fecha_fin: '',
   // Información Técnica
   descripcion: '',
-  estatus: 'DESARROLLO',
+  estatus: '',
   pap: false,
   lenguajes_frontend: '',
   lenguajes_backend: '',
@@ -64,15 +65,15 @@ const canManage = computed(() => authStore.hasPermission('gestionar.aplicativos'
 
 // Configuración de Columnas del DataTable: Exclusivamente información principal
 const tableColumns = ref<DataTableColumn[]>([
-  { key: 'id', label: 'ID', sortable: true, width: 'w-20' },
-  { key: 'nombre_aplicativo', label: 'Nombre Aplicativo', sortable: true },
-  { key: 'alias', label: 'Alias', sortable: true, width: 'w-32' },
-  { key: 'responsable', label: 'Responsable', sortable: true },
-  { key: 'gerencia_responsable', label: 'Gerencia', sortable: true },
-  { key: 'avance_total', label: 'Avance', sortable: true, width: 'w-36' },
-  { key: 'fecha_inicio', label: 'Inicio', sortable: true, width: 'w-28' },
-  { key: 'fecha_fin', label: 'Fin Estimado', sortable: true, width: 'w-32' },
-  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-36' }
+  { key: 'id', label: 'ID', sortable: true, visible: false, width: 'w-20', align: 'center' },
+  { key: 'nombre_aplicativo', label: 'Nombre Aplicativo', sortable: true, align: 'left' },
+  { key: 'alias', label: 'Alias', sortable: true, width: 'w-28', align: 'center' },
+  { key: 'responsable', label: 'Responsable', sortable: true, align: 'left' },
+  { key: 'gerencia_responsable', label: 'Gerencia', sortable: true, align: 'left' },
+  { key: 'avance_total', label: 'Avance', sortable: true, width: 'w-36', align: 'left' },
+  { key: 'fecha_inicio', label: 'Fecha Inicio', sortable: true, width: 'w-32', align: 'center' },
+  { key: 'fecha_fin', label: 'Fecha Fin', sortable: true, width: 'w-32', align: 'center' },
+  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-36', align: 'center' }
 ]);
 
 const tableFeatures: DataTableFeatures = {
@@ -131,15 +132,16 @@ const viewDetails = async (app: Aplicativo) => {
 const openCreateModal = () => {
   isEditing.value = false;
   editingAplicativoId.value = null;
+  formErrors.value = {};
   form.value = {
     nombre_aplicativo: '',
     alias: '',
     responsable: '',
-    gerencia_id: gerencias.value[0]?.id || null,
+    gerencia_id: null, // 'Seleccionar Gerencia' por defecto
     fecha_inicio: new Date().toISOString().slice(0, 10),
     fecha_fin: '',
     descripcion: '',
-    estatus: 'DESARROLLO',
+    estatus: '',
     pap: false,
     lenguajes_frontend: '',
     lenguajes_backend: '',
@@ -152,16 +154,22 @@ const openCreateModal = () => {
 const openEditModal = async (app: Aplicativo) => {
   isEditing.value = true;
   editingAplicativoId.value = app.id;
+  formErrors.value = {};
+
+  // Rescatar la gerencia registrada ya sea por id o por coincidencia con el nombre de gerencia
+  const matchedGerencia = gerencias.value.find(
+    g => g.id === app.gerencia_id || (app.gerencia_responsable && g.nombre_gerencia.trim().toLowerCase() === app.gerencia_responsable.trim().toLowerCase())
+  );
 
   form.value = {
     nombre_aplicativo: app.nombre_aplicativo,
     alias: app.alias,
     responsable: app.responsable,
-    gerencia_id: app.gerencia_id || null,
+    gerencia_id: matchedGerencia ? matchedGerencia.id : (app.gerencia_id ?? null),
     fecha_inicio: app.fecha_inicio || '',
     fecha_fin: app.fecha_fin || '',
     descripcion: '',
-    estatus: 'DESARROLLO',
+    estatus: '',
     pap: false,
     lenguajes_frontend: '',
     lenguajes_backend: '',
@@ -173,8 +181,11 @@ const openEditModal = async (app: Aplicativo) => {
     const res = await apiClient.get(`/aplicativos/${app.id}/detalles`);
     const d = res.data.data;
     if (d) {
+      if (d.gerencia_id !== undefined && d.gerencia_id !== null) {
+        form.value.gerencia_id = d.gerencia_id;
+      }
       form.value.descripcion = d.descripcion || '';
-      form.value.estatus = d.estatus || 'DESARROLLO';
+      form.value.estatus = d.estatus || '';
       form.value.pap = !!d.pap;
       form.value.lenguajes_frontend = d.lenguajes_frontend || '';
       form.value.lenguajes_backend = d.lenguajes_backend || '';
@@ -190,9 +201,11 @@ const openEditModal = async (app: Aplicativo) => {
 
 const closeModal = () => {
   isModalOpen.value = false;
+  formErrors.value = {};
 };
 
 const handleSubmit = async () => {
+  formErrors.value = {};
   saving.value = true;
   try {
     const payload = { ...form.value };
@@ -202,7 +215,7 @@ const handleSubmit = async () => {
       Swal.fire({
         icon: 'success',
         title: 'Aplicativo actualizado',
-        text: 'La información principal y técnica se actualizó correctamente.',
+        text: 'El aplicativo se actualizó correctamente.',
         timer: 1500,
         showConfirmButton: false
       });
@@ -211,7 +224,7 @@ const handleSubmit = async () => {
       Swal.fire({
         icon: 'success',
         title: 'Aplicativo registrado',
-        text: 'El nuevo sistema se ha registrado en el catálogo con todos sus datos.',
+        text: 'El aplicativo se ha registrado correctamente.',
         timer: 1500,
         showConfirmButton: false
       });
@@ -220,13 +233,10 @@ const handleSubmit = async () => {
     closeModal();
     await fetchAplicativos();
   } catch (error: any) {
-    const msg = error.response?.data?.message || 'Error al procesar el aplicativo.';
-    Swal.fire({
-      icon: 'error',
-      title: 'Error al guardar',
-      text: msg,
-      confirmButtonColor: '#032C49'
-    });
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      formErrors.value = error.response.data.errors;
+    }
+    console.error('Error al procesar el aplicativo:', error);
   } finally {
     saving.value = false;
   }
@@ -250,7 +260,7 @@ const handleDelete = async (app: Aplicativo) => {
       Swal.fire({
         icon: 'success',
         title: 'Eliminado',
-        text: 'El aplicativo ha sido eliminado del catálogo.',
+        text: 'El aplicativo ha sido eliminado correctamente.',
         timer: 1500,
         showConfirmButton: false
       });
@@ -335,7 +345,7 @@ onMounted(async () => {
       <!-- Gerencia Responsable -->
       <template #cell-gerencia_responsable="{ value }">
         <span class="text-xs text-gray-700 font-medium">
-          {{ value || 'No asignada' }}
+          {{ value || 'N/A' }}
         </span>
       </template>
 
@@ -423,21 +433,29 @@ onMounted(async () => {
               required
               maxlength="80"
               placeholder="ej. Sistema de Control GGSI"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.nombre_aplicativo ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
+            <p v-if="formErrors.nombre_aplicativo" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.nombre_aplicativo[0] }}
+            </p>
           </div>
 
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
-              Alias / Siglas
+              Alias
             </label>
             <input
               v-model="form.alias"
               type="text"
               maxlength="8"
               placeholder="ej. SC-GGSI"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] uppercase font-mono focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] uppercase font-mono focus:outline-none focus:ring-2"
+              :class="formErrors.alias ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
+            <p v-if="formErrors.alias" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.alias[0] }}
+            </p>
           </div>
         </div>
 
@@ -451,112 +469,142 @@ onMounted(async () => {
               type="text"
               maxlength="50"
               placeholder="Nombre del encargado"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.responsable ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
+            <p v-if="formErrors.responsable" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.responsable[0] }}
+            </p>
           </div>
 
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
-              Gerencia Asignada
+              Gerencia Responsable
             </label>
             <select
               v-model="form.gerencia_id"
-              :required="!isEditing"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              required
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.gerencia_id ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             >
-              <option :value="null">Seleccionar gerencia...</option>
+              <option :value="null" disabled>Seleccionar Gerencia...</option>
               <option v-for="g in gerencias" :key="g.id" :value="g.id">
                 {{ g.nombre_gerencia }} ({{ g.sigla }})
               </option>
             </select>
+            <p v-if="formErrors.gerencia_id" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.gerencia_id[0] }}
+            </p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
-              Fecha de Inicio
+              Fecha inicial
             </label>
             <input
               v-model="form.fecha_inicio"
               type="date"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.fecha_inicio ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
+            <p v-if="formErrors.fecha_inicio" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.fecha_inicio[0] }}
+            </p>
           </div>
 
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
-              Fecha Fin Estimada
+              Fecha final
             </label>
             <input
               v-model="form.fecha_fin"
               type="date"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.fecha_fin ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
+            <p v-if="formErrors.fecha_fin" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.fecha_fin[0] }}
+            </p>
           </div>
         </div>
 
         <!-- SECCIÓN 2: Información Técnica (Ficha Técnica en el formulario) -->
         <div class="border-b border-[#BDCEE5]/40 pb-2 pt-2">
           <h4 class="text-xs font-bold uppercase tracking-wider text-[#81299A]">
-            Información Técnica / Ficha Técnica
+             Ficha Técnica
           </h4>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
-              Estatus del Proyecto
+              Estatus
             </label>
-            <select
+            <input
               v-model="form.estatus"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
-            >
-              <option value="DESARROLLO">DESARROLLO</option>
-              <option value="EN PRODUCCIÓN">EN PRODUCCIÓN</option>
-              <option value="MANTENIMIENTO">MANTENIMIENTO</option>
-              <option value="PAUSADO">PAUSADO</option>
-            </select>
+              type="text"
+              maxlength="50"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.estatus? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
+            />
+            <p v-if="formErrors.estatus" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.estatus[0] }}
+            </p>
           </div>
 
-          <div class="flex items-center gap-2 pt-6">
-            <input
-              id="pap_check"
-              v-model="form.pap"
-              type="checkbox"
-              class="h-4 w-4 rounded border-[#BDCEE5] text-[#81299A] focus:ring-[#81299A] cursor-pointer"
-            />
-            <label for="pap_check" class="text-xs font-bold uppercase tracking-wider text-[#032C49] cursor-pointer">
-              Pase a Producción (PAP) Habilitado
-            </label>
+          <div class="flex flex-col justify-center pt-2">
+            <div class="flex items-center gap-2 pt-4">
+              <input
+                id="pap_check"
+                v-model="form.pap"
+                type="checkbox"
+                class="h-4 w-4 rounded border-[#BDCEE5] text-[#81299A] focus:ring-[#81299A] cursor-pointer"
+              />
+              <label for="pap_check" class="text-xs font-bold uppercase tracking-wider text-[#032C49] cursor-pointer">
+                Pase a Producción (PAP)
+              </label>
+            </div>
+            <p v-if="formErrors.pap" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.pap[0] }}
+            </p>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
-              Frontend
+              Lenguajes Frontend
             </label>
             <input
               v-model="form.lenguajes_frontend"
               type="text"
               maxlength="50"
               placeholder="ej. Vue 3, Tailwind"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.lenguajes_frontend ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
+            <p v-if="formErrors.lenguajes_frontend" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.lenguajes_frontend[0] }}
+            </p>
           </div>
 
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
-              Backend
+              Lenguajes Backend
             </label>
             <input
               v-model="form.lenguajes_backend"
               type="text"
               maxlength="50"
               placeholder="ej. Laravel 10, PHP"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.lenguajes_backend ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
+            <p v-if="formErrors.lenguajes_backend" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.lenguajes_backend[0] }}
+            </p>
           </div>
 
           <div>
@@ -568,8 +616,12 @@ onMounted(async () => {
               type="text"
               maxlength="50"
               placeholder="ej. PostgreSQL 16"
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.bases_datos ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
+            <p v-if="formErrors.bases_datos" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.bases_datos[0] }}
+            </p>
           </div>
         </div>
 
@@ -582,8 +634,12 @@ onMounted(async () => {
             rows="2"
             maxlength="200"
             placeholder="Alcance y objetivo principal del aplicativo..."
-            class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+            class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+            :class="formErrors.descripcion ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
           />
+          <p v-if="formErrors.descripcion" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.descripcion[0] }}
+          </p>
         </div>
 
         <div>
@@ -594,25 +650,22 @@ onMounted(async () => {
             v-model="form.observaciones"
             rows="2"
             placeholder="Requerimientos especiales, dependencias o notas técnicas..."
-            class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+            class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+            :class="formErrors.observaciones ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
           />
+          <p v-if="formErrors.observaciones" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.observaciones[0] }}
+          </p>
         </div>
 
         <!-- Botones de Acción -->
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#BDCEE5]/40">
           <button
-            type="button"
-            @click="closeModal"
-            class="px-4 py-2 text-sm rounded-lg border border-[#BDCEE5] text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Cancelar
-          </button>
-          <button
             type="submit"
             :disabled="saving"
             class="btn-primary text-sm cursor-pointer disabled:opacity-50"
           >
-            {{ saving ? 'Guardando...' : (isEditing ? 'Actualizar Aplicativo' : 'Crear Aplicativo') }}
+            {{ saving ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Guardar') }}
           </button>
         </div>
       </form>
@@ -633,7 +686,7 @@ onMounted(async () => {
         <!-- Descripción -->
         <div class="p-3.5 bg-[#F4F1FA]/60 rounded-xl border border-[#BDCEE5]/40 space-y-1">
           <span class="text-xs font-bold uppercase tracking-wider text-gray-500">Descripción Funcional</span>
-          <p class="text-xs text-gray-700 leading-relaxed">{{ selectedDetails.descripcion || 'Sin descripción técnica registrada.' }}</p>
+          <p class="text-xs text-gray-700 leading-relaxed">{{ selectedDetails.descripcion || 'Sin descripción técnica' }}</p>
         </div>
 
         <!-- Ficha de Componentes Tecnológicos -->
@@ -654,8 +707,8 @@ onMounted(async () => {
           </div>
 
           <div class="p-3 bg-white border border-[#BDCEE5]/50 rounded-xl">
-            <span class="font-bold text-gray-500 block mb-1">Estatus del Ciclo de Vida</span>
-            <span class="font-semibold text-[#81299A]">{{ selectedDetails.estatus || 'DESARROLLO' }}</span>
+            <span class="font-bold text-gray-500 block mb-1">Estatus</span>
+            <span class="font-semibold text-[#81299A]">{{ selectedDetails.estatus || 'Sin Estatus' }}</span>
           </div>
         </div>
 
@@ -667,7 +720,7 @@ onMounted(async () => {
             :class="selectedDetails.pap ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-600 border border-gray-200'"
           >
             <component :is="selectedDetails.pap ? CheckCircleIcon : XCircleIcon" class="h-4 w-4" />
-            {{ selectedDetails.pap ? 'Aprobado / Activo' : 'Pendiente' }}
+            {{ selectedDetails.pap ? 'Sí' : 'No' }}
           </span>
         </div>
 
@@ -675,16 +728,6 @@ onMounted(async () => {
         <div v-if="selectedDetails.observaciones" class="p-3.5 bg-amber-50/70 rounded-xl border border-amber-200 text-xs text-amber-900 space-y-1">
           <span class="font-bold uppercase text-[11px] block">Observaciones Técnicas:</span>
           <p class="leading-relaxed">{{ selectedDetails.observaciones }}</p>
-        </div>
-
-        <div class="flex justify-end pt-2">
-          <button
-            type="button"
-            @click="isDetailsModalOpen = false"
-            class="btn-primary text-xs cursor-pointer px-4 py-2"
-          >
-            Cerrar Ficha
-          </button>
         </div>
       </div>
 

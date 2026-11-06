@@ -1,5 +1,6 @@
 import type { Gerencia } from "./Gerencia";
 import type { Area } from "./Area";
+import type { Aplicativo } from "./Aplicativo";
 
 export interface Actividad {
     id: number;
@@ -14,5 +15,7 @@ export interface Actividad {
     area_id: number;
     aplicativo_id: number;
     gerencias_colaboradoras?: Gerencia[];
+    gerenciasColaboradoras?: Gerencia[];
     area?: Area;
+    aplicativo?: Aplicativo;
 }

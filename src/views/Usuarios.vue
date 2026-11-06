@@ -33,6 +33,7 @@ const searchQuery = ref('');
 const isModalOpen = ref(false);
 const isEditing = ref(false);
 const editingUserId = ref<number | null>(null);
+const formErrors = ref<Record<string, string[]>>({});
 
 const form = ref({
   username: '',
@@ -50,14 +51,14 @@ const canManage = computed(() => authStore.hasPermission('gestionar.usuarios'));
 
 // Configuración de columnas del DataTable según la Skill
 const tableColumns = ref<DataTableColumn[]>([
-  { key: 'id', label: 'ID', sortable: true, width: 'w-20' },
-  { key: 'username', label: 'Usuario', sortable: true },
-  { key: 'full_name', label: 'Nombre Completo', sortable: true },
-  { key: 'email', label: 'Email', sortable: true },
-  { key: 'gerencia', label: 'Gerencia', sortable: true },
-  { key: 'roles', label: 'Rol', sortable: false },
-  { key: 'is_active', label: 'Estado', sortable: true },
-  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-28' },
+  { key: 'id', label: 'ID', sortable: true, visible: false, width: 'w-20', align: 'center' },
+  { key: 'username', label: 'Usuario', sortable: true, align: 'left' },
+  { key: 'full_name', label: 'Nombre Completo', sortable: true, align: 'left' },
+  { key: 'email', label: 'Email', sortable: true, align: 'left' },
+  { key: 'gerencia', label: 'Gerencia', sortable: true, align: 'left' },
+  { key: 'roles', label: 'Rol', sortable: false, width: 'w-32', align: 'center' },
+  { key: 'is_active', label: 'Estado', sortable: true, width: 'w-28', align: 'center' },
+  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-28', align: 'center' },
 ]);
 
 // Características avanzadas del DataTable
@@ -121,6 +122,7 @@ const fetchAuxiliaryData = async () => {
 const openCreateModal = () => {
   isEditing.value = false;
   editingUserId.value = null;
+  formErrors.value = {};
   form.value = {
     username: '',
     first_name: '',
@@ -137,6 +139,7 @@ const openCreateModal = () => {
 const openEditModal = (user: User) => {
   isEditing.value = true;
   editingUserId.value = user.id;
+  formErrors.value = {};
 
   const currentRoleNames: string[] = (user.roles || []).map((r: any) =>
     typeof r === 'string' ? r : r.name
@@ -157,9 +160,11 @@ const openEditModal = (user: User) => {
 
 const closeModal = () => {
   isModalOpen.value = false;
+  formErrors.value = {};
 };
 
 const handleSubmit = async () => {
+  formErrors.value = {};
   saving.value = true;
 
   try {
@@ -200,13 +205,10 @@ const handleSubmit = async () => {
     closeModal();
     await fetchUsers();
   } catch (error: any) {
-    const msg = error.response?.data?.message || 'Ocurrió un error al procesar el usuario.';
-    Swal.fire({
-      icon: 'error',
-      title: 'Error al guardar',
-      text: msg,
-      confirmButtonColor: '#032C49',
-    });
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      formErrors.value = error.response.data.errors;
+    }
+    console.error('Error al procesar el usuario:', error);
   } finally {
     saving.value = false;
   }
@@ -373,9 +375,13 @@ onMounted(async () => {
             v-model="form.username"
             type="text"
             required
-            class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+            class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+            :class="formErrors.username ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             placeholder="ej. jdoe"
           />
+          <p v-if="formErrors.username" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.username[0] }}
+          </p>
         </div>
 
         <!-- Nombres y Apellidos en grid -->
@@ -388,9 +394,13 @@ onMounted(async () => {
               v-model="form.first_name"
               type="text"
               required
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.first_name ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
               placeholder="Juan"
             />
+            <p v-if="formErrors.first_name" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.first_name[0] }}
+            </p>
           </div>
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
@@ -400,9 +410,13 @@ onMounted(async () => {
               v-model="form.last_name"
               type="text"
               required
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.last_name ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
               placeholder="Pérez"
             />
+            <p v-if="formErrors.last_name" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.last_name[0] }}
+            </p>
           </div>
         </div>
 
@@ -415,9 +429,13 @@ onMounted(async () => {
             v-model="form.email"
             type="email"
             required
-            class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+            class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+            :class="formErrors.email ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             placeholder="juan.perez@empresa.com"
           />
+          <p v-if="formErrors.email" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.email[0] }}
+          </p>
         </div>
 
         <!-- Contraseña -->
@@ -430,9 +448,13 @@ onMounted(async () => {
             v-model="form.password"
             type="password"
             :required="!isEditing"
-            class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+            class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+            :class="formErrors.password ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             placeholder="••••••••"
           />
+          <p v-if="formErrors.password" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.password[0] }}
+          </p>
         </div>
 
         <!-- Gerencia y Rol -->
@@ -444,7 +466,8 @@ onMounted(async () => {
             <select
               v-model="form.gerencia_id"
               required
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.gerencia_id ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             >
               <option :value="null" disabled>Seleccionar gerencia...</option>
               <option
@@ -455,6 +478,9 @@ onMounted(async () => {
                 {{ g.nombre_gerencia }} ({{ g.sigla }})
               </option>
             </select>
+            <p v-if="formErrors.gerencia_id" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.gerencia_id[0] }}
+            </p>
           </div>
 
           <div>
@@ -465,7 +491,8 @@ onMounted(async () => {
               :value="form.roles[0] || 'colaborador'"
               @change="(e: any) => form.roles = [e.target.value]"
               required
-              class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+              class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
+              :class="formErrors.roles ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             >
               <option v-if="availableRoles.length === 0" value="colaborador">Colaborador</option>
               <option
@@ -476,6 +503,9 @@ onMounted(async () => {
                 {{ r.name }}
               </option>
             </select>
+            <p v-if="formErrors.roles" class="mt-1 text-xs text-rose-600 font-medium">
+              {{ formErrors.roles[0] }}
+            </p>
           </div>
         </div>
 

@@ -39,34 +39,44 @@ export function handleRequest(error: AxiosError): string {
       case 404:
         message = data.message || 'Recurso no encontrado';
         break;
-      // case 422:
-      //   // Manejo específico para los errores de validación (FormRequests)
-      //   if (data.errors) {
-      //     const erroresArray = Object.values(data.errors).flat() as string[];
-      //     message = erroresArray.join(' ');
-      //   } else {
-      //     message = data.message || 'Error de validación en los datos enviados';
-      //   }
-      //   break;
+      case 422:
+        // Manejo específico para los errores de validación (FormRequests)
+        if (data.errors) {
+          const erroresArray = Object.values(data.errors).flat() as string[];
+          message = erroresArray.map((err: string) => `• ${err}`).join('<br>');
+        } else {
+          message = data.message || 'Error de validación en los datos enviados';
+        }
+        break;
       case 423:
         // Bloqueo por intentos de inicio de sesión fallidos
         message = data.message || 'Su cuenta ha sido bloqueada por intentos fallidos';
         break;
       case 500:
-        message = data.message || 'Error interno del servidor. Intentelo más tarde';
+        message = data.message || 'Error interno del servidor. Inténtelo más tarde';
         break;
       default:
         message = data.message || `Ocurrió un error inesperado (${status})`;
-        break
+        break;
     }
   }
 
-  Swal.fire({
-    icon: 'error',
-    text: message,
-    confirmButtonColor: '#3085d6',
-    confirmButtonText: 'Aceptar',
-  })
+  const isHtml = message.includes('<br>');
+  const status = error.response?.status;
+
+  // En errores 422 (validación de formulario), NO mostramos SweetAlert
+  // para permitir que los formularios muestren los mensajes de error inline debajo de cada campo.
+  if (status !== 422) {
+    Swal.fire({
+      icon: 'error',
+      html: isHtml ? `<div class="text-left text-sm space-y-1">${message}</div>` : undefined,
+      text: isHtml ? undefined : message,
+      confirmButtonColor: '#032C49',
+      confirmButtonText: 'Aceptar',
+    });
+  }
+
+  return message;
 
   return message
 }

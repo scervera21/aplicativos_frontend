@@ -49,6 +49,12 @@ const menuItems = computed(() => [
     path: '/actividades',
     icon: ClipboardDocumentListIcon,
     permission: 'ver.actividades'
+  },
+  {
+    name: 'Project Manager',
+    path: '/project-manager',
+    icon: ClipboardDocumentListIcon,
+    permission: 'gestionar.actividades'
   }
 ]);
 

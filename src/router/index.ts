@@ -51,15 +51,23 @@ const router = createRouter({
       meta: { requiresAuth: true, permission: 'ver.actividades' },
     },
     {
-    path: '/aplicativos/:actividadID/project-manager',
-    name: 'ProjectManager',
-    component: () => import('@/views/ProjectManager.vue'),
-    meta: { 
-      requiresAuth: true, 
-      permission: 'gestionar.actividades'
+      path: '/project-manager',
+      component: () => import('@/views/ProjectManager.vue'),
+      meta: {
+        requiresAuth: true,
+        permission: 'ver.project-manager'
+      },
     },
-    props: true
-  },
+    {
+      path: '/aplicativos/:actividadID/project-manager',
+      name: 'ProjectManager',
+      component: () => import('@/views/ProjectManager.vue'),
+      meta: { 
+        requiresAuth: true, 
+        permission: 'gestionar.project-manager'
+      },
+      props: true
+    },
     {
       path: '/:pathMatch(.*)*',
       name: 'not-found',

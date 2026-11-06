@@ -33,6 +33,7 @@ const saving = ref(false);
 const isModalOpen = ref(false);
 const isEditing = ref(false);
 const editingRoleId = ref<number | null>(null);
+const formErrors = ref<Record<string, string[]>>({});
 
 const form = ref({
   name: '',
@@ -49,9 +50,9 @@ const canManage = computed(() => authStore.hasPermission('gestionar.roles'));
 
 // Configuración de Columnas (se retiró la columna 'guard_name')
 const tableColumns = ref<DataTableColumn[]>([
-  { key: 'id', label: 'ID', sortable: true, width: 'w-24' },
-  { key: 'name', label: 'Nombre del Rol', sortable: true },
-  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-36' }
+  { key: 'id', label: 'ID', sortable: true, visible: false, width: 'w-24', align: 'center' },
+  { key: 'name', label: 'Nombre del Rol', sortable: true, align: 'left' },
+  { key: 'acciones', label: 'Acciones', sortable: false, width: 'w-36', align: 'center' }
 ]);
 
 const tableFeatures: DataTableFeatures = {
@@ -141,6 +142,7 @@ const deselectAll = () => {
 const openCreateModal = () => {
   isEditing.value = false;
   editingRoleId.value = null;
+  formErrors.value = {};
   form.value = {
     name: '',
     permissions: []
@@ -151,6 +153,7 @@ const openCreateModal = () => {
 const openEditModal = async (role: Role) => {
   isEditing.value = true;
   editingRoleId.value = role.id;
+  formErrors.value = {};
   form.value = {
     name: role.name,
     permissions: []
@@ -184,6 +187,7 @@ const openViewModal = async (role: Role) => {
 
 const closeModal = () => {
   isModalOpen.value = false;
+  formErrors.value = {};
 };
 
 const closeViewModal = () => {
@@ -193,17 +197,15 @@ const closeViewModal = () => {
 };
 
 const handleSubmit = async () => {
+  formErrors.value = {};
   const roleName = form.value.name.trim().toUpperCase();
 
   // Validación: Ningún rol excepto administrador puede tener todos los permisos
   if (roleName !== 'ADMINISTRADOR' && catalogPermissions.value.length > 0) {
     if (form.value.permissions.length >= catalogPermissions.value.length) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Asignación no permitida',
-        text: 'Ningún rol excepto ADMINISTRADOR puede tener asignados todos los permisos.',
-        confirmButtonColor: '#032C49'
-      });
+      formErrors.value = {
+        permissions: ['Ningún rol excepto ADMINISTRADOR puede tener asignados todos los permisos.']
+      };
       return;
     }
   }
@@ -238,13 +240,14 @@ const handleSubmit = async () => {
     closeModal();
     await fetchRoles();
   } catch (error: any) {
-    const msg = error.response?.data?.message || 'Error al procesar el rol.';
-    Swal.fire({
-      icon: 'error',
-      title: 'Error al guardar',
-      text: msg,
-      confirmButtonColor: '#032C49'
-    });
+    if (error.response?.status === 422 && error.response?.data?.errors) {
+      formErrors.value = error.response.data.errors;
+    } else if (error.response?.data?.message) {
+      formErrors.value = {
+        name: [error.response.data.message]
+      };
+    }
+    console.error('Error al procesar el rol:', error);
   } finally {
     saving.value = false;
   }
@@ -390,8 +393,12 @@ onMounted(async () => {
             type="text"
             required
             placeholder="ej. SUPERVISOR, COLABORADOR, AUDITOR"
-            class="w-full px-3 py-2 border border-[#BDCEE5] rounded-lg text-sm text-[#032C49] uppercase font-semibold focus:outline-none focus:ring-2 focus:ring-[#81299A]"
+            class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] uppercase font-semibold focus:outline-none focus:ring-2"
+            :class="formErrors.name ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
           />
+          <p v-if="formErrors.name" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.name[0] }}
+          </p>
         </div>
 
         <!-- Sección de Selección de Permisos -->
@@ -453,6 +460,10 @@ onMounted(async () => {
           <div class="text-right text-xs text-gray-500">
             Seleccionados: <strong class="text-[#81299A]">{{ form.permissions.length }}</strong> de {{ catalogPermissions.length }}
           </div>
+
+          <p v-if="formErrors.permissions" class="mt-1 text-xs text-rose-600 font-medium">
+            {{ formErrors.permissions[0] }}
+          </p>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#BDCEE5]/40">

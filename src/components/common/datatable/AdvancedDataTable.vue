@@ -132,17 +132,17 @@ defineExpose({
             <th
               v-for="col in visibleColumns"
               :key="col.key"
-              class="px-6 py-4 whitespace-nowrap"
+              class="px-5 py-3.5 md:px-6 md:py-4 whitespace-nowrap text-xs font-bold transition-colors"
               :class="[
                 col.width || '',
                 col.sortable !== false ? 'cursor-pointer select-none hover:bg-[#BDCEE5]/20' : '',
-                col.key === 'acciones' ? 'text-center' : ''
+                col.align === 'center' || col.key === 'acciones' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left'
               ]"
               @click="toggleSort(col.key)"
             >
               <div
                 class="inline-flex items-center gap-1.5"
-                :class="col.key === 'acciones' ? 'justify-center w-full' : ''"
+                :class="col.align === 'center' || col.key === 'acciones' ? 'justify-center w-full' : col.align === 'right' ? 'justify-end w-full' : 'justify-start'"
               >
                 <!-- Slot de Cabecera Personalizado o Label -->
                 <slot :name="`header-${col.key}`" :column="col">
@@ -168,7 +168,7 @@ defineExpose({
             :class="{ 'bg-[#81299A]/5': features?.selectable && isSelected(row[idField]) }"
           >
             <!-- Checkbox de Fila -->
-            <td v-if="features?.selectable" class="px-4 py-4 w-12 text-center">
+            <td v-if="features?.selectable" class="px-4 py-3.5 md:py-4 w-12 text-center">
               <input
                 type="checkbox"
                 :checked="isSelected(row[idField])"
@@ -181,8 +181,8 @@ defineExpose({
             <td
               v-for="col in visibleColumns"
               :key="col.key"
-              class="px-6 py-4 text-sm text-gray-700 align-middle"
-              :class="col.key === 'acciones' ? 'text-center' : ''"
+              class="px-5 py-3.5 md:px-6 md:py-4 text-sm text-gray-700 align-middle"
+              :class="col.align === 'center' || col.key === 'acciones' ? 'text-center' : col.align === 'right' ? 'text-right' : 'text-left'"
             >
               <!-- Slot Dinámico por Columna (#cell-key) -->
               <slot
