@@ -271,8 +271,7 @@ onMounted(async () => {
             v-model="form.sigla"
             type="text"
             required
-            maxlength="10"
-            placeholder="ej. GGSI, DSI, OTI"
+            maxlength="5"
             class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] uppercase font-mono focus:outline-none focus:ring-2"
             :class="formErrors.sigla ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
           />
@@ -290,7 +289,6 @@ onMounted(async () => {
             type="text"
             required
             maxlength="80"
-            placeholder="ej. Gerencia General de Seguridad de la Información"
             class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
             :class="formErrors.nombre_gerencia ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
           />

@@ -36,7 +36,7 @@ const isEditing = ref(false);
 const editingAplicativoId = ref<number | null>(null);
 const formErrors = ref<Record<string, string[]>>({});
 
-// Modal Secundario (Ficha Técnica / Información Técnica)
+// Modal Secundario (Ficha Técnica)
 const isDetailsModalOpen = ref(false);
 const selectedDetails = ref<DetalleAplicativo | null>(null);
 const selectedAppName = ref('');
@@ -245,7 +245,7 @@ const handleSubmit = async () => {
 const handleDelete = async (app: Aplicativo) => {
   const result = await Swal.fire({
     title: '¿Eliminar aplicativo?',
-    text: `¿Estás seguro de eliminar "${app.nombre_aplicativo}"? Esta acción borrará todas sus actividades asociadas.`,
+    text: `¿Estás seguro?`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d33',
@@ -418,7 +418,7 @@ onMounted(async () => {
         <!-- SECCIÓN 1: Información Principal -->
         <div class="border-b border-[#BDCEE5]/40 pb-2">
           <h4 class="text-xs font-bold uppercase tracking-wider text-[#81299A]">
-            Información Principal
+            Ficha Principal
           </h4>
         </div>
 
@@ -432,7 +432,6 @@ onMounted(async () => {
               type="text"
               required
               maxlength="80"
-              placeholder="ej. Sistema de Control GGSI"
               class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
               :class="formErrors.nombre_aplicativo ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
@@ -448,8 +447,7 @@ onMounted(async () => {
             <input
               v-model="form.alias"
               type="text"
-              maxlength="8"
-              placeholder="ej. SC-GGSI"
+              maxlength="10"
               class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] uppercase font-mono focus:outline-none focus:ring-2"
               :class="formErrors.alias ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
@@ -462,7 +460,7 @@ onMounted(async () => {
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-1">
-              Responsable Técnico
+              Responsable
             </label>
             <input
               v-model="form.responsable"
@@ -530,7 +528,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <!-- SECCIÓN 2: Información Técnica (Ficha Técnica en el formulario) -->
+        <!-- SECCIÓN 2: Información detallada (Ficha Técnica) -->
         <div class="border-b border-[#BDCEE5]/40 pb-2 pt-2">
           <h4 class="text-xs font-bold uppercase tracking-wider text-[#81299A]">
              Ficha Técnica
@@ -581,7 +579,7 @@ onMounted(async () => {
               v-model="form.lenguajes_frontend"
               type="text"
               maxlength="50"
-              placeholder="ej. Vue 3, Tailwind"
+              placeholder="Lenguaje 1 / Lenguaje 2...."
               class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
               :class="formErrors.lenguajes_frontend ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
@@ -598,7 +596,7 @@ onMounted(async () => {
               v-model="form.lenguajes_backend"
               type="text"
               maxlength="50"
-              placeholder="ej. Laravel 10, PHP"
+              placeholder="Lenguaje 1 / Lenguaje 2..."
               class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
               :class="formErrors.lenguajes_backend ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />
@@ -615,7 +613,7 @@ onMounted(async () => {
               v-model="form.bases_datos"
               type="text"
               maxlength="50"
-              placeholder="ej. PostgreSQL 16"
+              placeholder="Base de Datos 1 / Base de Datos 2..."
               class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
               :class="formErrors.bases_datos ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             />

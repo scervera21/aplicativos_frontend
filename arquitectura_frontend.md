@@ -223,4 +223,3 @@ Implementación inicial limpia que expone la información actual del usuario en 
 1. **Jerarquía SCSS `@use`:** Se reordenaron las hojas `@use` para estar en la parte superior absoluta de los archivos `.scss` antes de cualquier regla CSS o Tailwind.
 2. **Funciones de Color Sass (`darken` / `rgba`):** Se migraron los procesamientos de color nativos de Sass incompatibles con `var(--color)` a funciones CSS modernas como `color-mix(in srgb, var(...) 85%, black)`.
 3. **Migración de Navigation Guards:** Eliminación completa del parámetro `next()` en favor de retornos implícitos (`return { name: 'Route' }` / `return true`).
-4. **Solución a Solapamiento de Vistas (Login / Layout):** Independización de la ruta `/login` del componente `DefaultLayout.vue` en la configuración de Vue Router.

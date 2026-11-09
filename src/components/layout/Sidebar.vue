@@ -7,7 +7,8 @@ import {
   ShieldCheckIcon,
   BuildingOfficeIcon,
   ComputerDesktopIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  ChartBarSquareIcon
 } from '@heroicons/vue/24/outline';
 
 const authStore = useAuthStore();
@@ -53,8 +54,8 @@ const menuItems = computed(() => [
   {
     name: 'Project Manager',
     path: '/project-manager',
-    icon: ClipboardDocumentListIcon,
-    permission: 'gestionar.actividades'
+    icon: ChartBarSquareIcon,
+    permission: 'ver.project-manager'
   }
 ]);
 

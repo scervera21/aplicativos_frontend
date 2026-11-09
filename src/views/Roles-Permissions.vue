@@ -256,7 +256,7 @@ const handleSubmit = async () => {
 const handleDelete = async (role: Role) => {
   const result = await Swal.fire({
     title: '¿Eliminar Rol?',
-    text: `¿Estás seguro de eliminar el rol "${role.name}"? Los usuarios vinculados perderán sus capacidades.`,
+    text: `¿Estás seguro?`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d33',
@@ -392,7 +392,6 @@ onMounted(async () => {
             v-model="form.name"
             type="text"
             required
-            placeholder="ej. SUPERVISOR, COLABORADOR, AUDITOR"
             class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] uppercase font-semibold focus:outline-none focus:ring-2"
             :class="formErrors.name ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
           />

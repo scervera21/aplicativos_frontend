@@ -217,7 +217,7 @@ const handleSubmit = async () => {
 const handleDelete = async (user: User) => {
   const result = await Swal.fire({
     title: '¿Eliminar usuario?',
-    text: `¿Estás seguro de que deseas eliminar a "${user.username}"? Esta acción no se puede deshacer.`,
+    text: `¿Estás seguro?`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d33',
@@ -377,7 +377,6 @@ onMounted(async () => {
             required
             class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
             :class="formErrors.username ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
-            placeholder="ej. jdoe"
           />
           <p v-if="formErrors.username" class="mt-1 text-xs text-rose-600 font-medium">
             {{ formErrors.username[0] }}
@@ -396,7 +395,6 @@ onMounted(async () => {
               required
               class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
               :class="formErrors.first_name ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
-              placeholder="Juan"
             />
             <p v-if="formErrors.first_name" class="mt-1 text-xs text-rose-600 font-medium">
               {{ formErrors.first_name[0] }}
@@ -412,7 +410,6 @@ onMounted(async () => {
               required
               class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
               :class="formErrors.last_name ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
-              placeholder="Pérez"
             />
             <p v-if="formErrors.last_name" class="mt-1 text-xs text-rose-600 font-medium">
               {{ formErrors.last_name[0] }}
@@ -431,7 +428,6 @@ onMounted(async () => {
             required
             class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
             :class="formErrors.email ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
-            placeholder="juan.perez@empresa.com"
           />
           <p v-if="formErrors.email" class="mt-1 text-xs text-rose-600 font-medium">
             {{ formErrors.email[0] }}
@@ -450,7 +446,6 @@ onMounted(async () => {
             :required="!isEditing"
             class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
             :class="formErrors.password ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
-            placeholder="••••••••"
           />
           <p v-if="formErrors.password" class="mt-1 text-xs text-rose-600 font-medium">
             {{ formErrors.password[0] }}

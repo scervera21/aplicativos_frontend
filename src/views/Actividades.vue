@@ -98,7 +98,7 @@ const tabsConfig = computed<TabItem[]>(() => {
   const items: TabItem[] = [
     {
       key: 'todas',
-      label: 'Todas las Áreas',
+      label: 'TODOS',
       icon: Squares2X2Icon,
       areaId: null
     }
@@ -416,7 +416,7 @@ const handleToggleCompletado = async (actividad: Actividad) => {
 const handleDelete = async (actividad: Actividad) => {
   const result = await Swal.fire({
     title: '¿Eliminar actividad?',
-    text: `¿Estás seguro de eliminar "${actividad.nombre_actividad}"? Se recalculará automáticamente el avance del aplicativo.`,
+    text: `¿Estás seguro?`,
     icon: 'warning',
     showCancelButton: true,
     confirmButtonColor: '#d33',
@@ -431,7 +431,7 @@ const handleDelete = async (actividad: Actividad) => {
       Swal.fire({
         icon: 'success',
         title: 'Actividad eliminada',
-        text: 'El registro ha sido removido con éxito.',
+        text: 'Se eliminó correctamente',
         timer: 1500,
         showConfirmButton: false
       });
@@ -531,9 +531,6 @@ onMounted(async () => {
         <template #cell-nombre_actividad="{ row }">
           <div class="space-y-0.5">
             <span class="font-semibold text-[#032C49] block text-sm">{{ row.nombre_actividad }}</span>
-            <span v-if="row.comentarios" class="text-xs text-gray-500 line-clamp-1 italic">
-              {{ row.comentarios }}
-            </span>
           </div>
         </template>
 
@@ -949,13 +946,6 @@ onMounted(async () => {
         <div class="flex items-center justify-end gap-3 pt-4 border-t border-[#BDCEE5]/40">
           <button
             type="button"
-            @click="closeQuickPercentageModal"
-            class="px-4 py-2 text-sm rounded-lg border border-[#BDCEE5] text-gray-600 hover:bg-gray-50 transition-colors cursor-pointer"
-          >
-            Cancelar
-          </button>
-          <button
-            type="button"
             @click="handleSaveQuickPercentage"
             :disabled="savingPercentage"
             class="btn-primary text-sm cursor-pointer disabled:opacity-50"
@@ -1009,7 +999,7 @@ onMounted(async () => {
             <span class="font-bold text-gray-500 uppercase tracking-wider block">Fecha de Creación</span>
             <div class="flex items-center gap-1.5 font-mono text-gray-700">
               <ClockIcon class="h-4 w-4 text-[#032C49]" />
-              <span>{{ selectedActividadDetails.fecha_creacion || 'No especificada' }}</span>
+              <span>{{ selectedActividadDetails.fecha_creacion || 'Sin fecha' }}</span>
             </div>
           </div>
 
@@ -1018,7 +1008,7 @@ onMounted(async () => {
             <span class="font-bold text-gray-500 uppercase tracking-wider block">Fecha de Culminación</span>
             <div class="flex items-center gap-1.5 font-mono" :class="selectedActividadDetails.fecha_culminacion ? 'text-gray-700' : 'text-gray-400 italic'">
               <CheckCircleIcon class="h-4 w-4" :class="selectedActividadDetails.fecha_culminacion ? 'text-emerald-600' : 'text-gray-300'" />
-              <span>{{ selectedActividadDetails.fecha_culminacion || 'Pendiente por culminar' }}</span>
+              <span>{{ selectedActividadDetails.fecha_culminacion || 'Sin fecha' }}</span>
             </div>
           </div>
         </div>
@@ -1027,7 +1017,7 @@ onMounted(async () => {
         <div class="p-3.5 bg-white rounded-xl border border-[#BDCEE5]/50 space-y-1">
           <span class="text-xs font-bold uppercase tracking-wider text-gray-500 block">Comentarios / Observaciones</span>
           <p class="text-xs text-gray-700 leading-relaxed italic bg-[#F4F1FA]/50 p-2.5 rounded-lg border border-[#BDCEE5]/30">
-            {{ selectedActividadDetails.comentarios || 'Sin observaciones registradas para esta actividad.' }}
+            {{ selectedActividadDetails.comentarios || 'Ninguno' }}
           </p>
         </div>
       </div>
