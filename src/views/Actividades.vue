@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import apiClient from '@/plugins/axios';
 import { useAuthStore } from '@/stores/authStore';
 import type { Actividad } from '@/interfaces/Actividad';
@@ -28,9 +29,11 @@ import {
   ClockIcon,
   ExclamationTriangleIcon,
   EyeIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  ChartBarSquareIcon
 } from '@heroicons/vue/24/outline';
 
+const router = useRouter();
 const authStore = useAuthStore();
 
 // ==========================================
@@ -46,9 +49,17 @@ const saving = ref(false);
 // Control de Permisos
 const canManage = computed(() => {
   return authStore.hasPermission('gestionar.actividades') ||
-    authStore.hasRole('ADMIN') ||
-    authStore.hasRole('administrador');
+    authStore.hasRole('ADMINISTRADOR');
 });
+
+const canViewProjectManager = computed(() => {
+  return authStore.hasPermission('ver.project-manager') ||
+    authStore.hasRole('ADMINISTRADOR');
+});
+
+const goToProjectManager = (appId: number) => {
+  router.push({ name: 'ProjectManagerDetalle', params: { aplicativoID: appId } });
+};
 
 // Modal de Creación / Edición Completa
 const isModalOpen = ref(false);
@@ -647,6 +658,16 @@ onMounted(async () => {
         <!-- Acciones -->
         <template #cell-acciones="{ row }">
           <div class="inline-flex items-center gap-1.5 justify-center">
+            <!-- Botón Project Manager -->
+            <button
+              v-if="canViewProjectManager && (row.aplicativo_id || row.aplicativo?.id)"
+              @click="goToProjectManager(row.aplicativo_id || row.aplicativo?.id)"
+              class="p-2 text-[#81299A] hover:bg-[#F4F1FA] rounded-xl transition-colors cursor-pointer"
+              title="Ver en Project Manager"
+            >
+              <ChartBarSquareIcon class="h-4 w-4" />
+            </button>
+
             <!-- Botón Información Secundaria -->
             <button
               @click="openSecondaryInfoModal(row)"

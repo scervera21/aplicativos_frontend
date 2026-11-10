@@ -130,7 +130,7 @@ const openCreateModal = () => {
     email: '',
     password: '',
     gerencia_id: gerencias.value[0]?.id || null,
-    roles: ['colaborador'],
+    roles: ['COLABORADOR'],
     is_active: true,
   };
   isModalOpen.value = true;
@@ -152,7 +152,7 @@ const openEditModal = (user: User) => {
     email: user.email,
     password: '', // Se deja vacío para que no se sobreescriba a menos que se ingrese una nueva
     gerencia_id: user.gerencia_id || user.gerencia?.id || null,
-    roles: currentRoleNames.length > 0 ? currentRoleNames : ['colaborador'],
+    roles: currentRoleNames.length > 0 ? currentRoleNames : ['COLABORADOR'],
     is_active: user.is_active,
   };
   isModalOpen.value = true;
@@ -483,13 +483,13 @@ onMounted(async () => {
               Rol Principal
             </label>
             <select
-              :value="form.roles[0] || 'colaborador'"
+              :value="form.roles[0] || 'COLABORADOR'"
               @change="(e: any) => form.roles = [e.target.value]"
               required
               class="w-full px-3 py-2 border rounded-lg text-sm text-[#032C49] focus:outline-none focus:ring-2"
               :class="formErrors.roles ? 'border-rose-500 focus:ring-rose-500' : 'border-[#BDCEE5] focus:ring-[#81299A]'"
             >
-              <option v-if="availableRoles.length === 0" value="colaborador">Colaborador</option>
+              <option v-if="availableRoles.length === 0" value="COLABORADOR">Colaborador</option>
               <option
                 v-for="r in availableRoles"
                 :key="r.id"

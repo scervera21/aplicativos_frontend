@@ -75,9 +75,9 @@ const filteredMenu = computed(() => {
   <aside class="app-sidebar">
     <!-- Logotipo / Título de la Aplicación -->
     <div class="h-16 flex items-center px-6 border-b border-[#032C49]/40 bg-[#032C49]">
-      <span class="text-lg font-bold tracking-wider text-white">
+      <!-- <span class="text-lg font-bold tracking-wider text-white">
         Gestión <span class="text-[#BDCEE5]">Aplicativos</span>
-      </span>
+      </span> -->
     </div>
 
     <!-- Navegación Lateral -->

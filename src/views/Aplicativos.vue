@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import apiClient from '@/plugins/axios';
 import { useAuthStore } from '@/stores/authStore';
 import type { Aplicativo, DetalleAplicativo } from '@/interfaces/Aplicativo';
@@ -17,9 +18,11 @@ import {
   ArrowPathIcon,
   DocumentTextIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
+  ChartBarSquareIcon
 } from '@heroicons/vue/24/outline';
 
+const router = useRouter();
 const authStore = useAuthStore();
 
 // ==========================================
@@ -62,6 +65,11 @@ const form = ref({
 });
 
 const canManage = computed(() => authStore.hasPermission('gestionar.aplicativos'));
+const canViewProjectManager = computed(() => authStore.hasPermission('ver.project-manager') || authStore.hasRole('ADMINISTRADOR'));
+
+const goToProjectManager = (appId: number) => {
+  router.push({ name: 'ProjectManagerDetalle', params: { aplicativoID: appId } });
+};
 
 // Configuración de Columnas del DataTable: Exclusivamente información principal
 const tableColumns = ref<DataTableColumn[]>([
@@ -376,6 +384,16 @@ onMounted(async () => {
       <!-- Columna Acciones: Botón de Ficha Técnica agrupado aquí -->
       <template #cell-acciones="{ row }">
         <div class="inline-flex items-center gap-1 justify-center">
+          <!-- Botón Project Manager -->
+          <button
+            v-if="canViewProjectManager"
+            @click="goToProjectManager(row.id)"
+            class="p-2 text-[#032C49] hover:bg-[#F4F1FA] rounded-xl transition-colors cursor-pointer"
+            title="Ver Project Manager"
+          >
+            <ChartBarSquareIcon class="h-4 w-4" />
+          </button>
+
           <!-- Botón Ficha Técnica -->
           <button
             @click="viewDetails(row)"

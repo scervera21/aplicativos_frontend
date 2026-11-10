@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import apiClient from '@/plugins/axios';
 import { useAuthStore } from '@/stores/authStore';
 import MetricCard from '@/components/common/MetricCard.vue';
 import ProgressCard from '@/components/common/ProgressCard.vue';
+import type { ProjectManagerResumenItem } from '@/interfaces/ProjectManager';
 import {
   UserCircleIcon,
   EnvelopeIcon,
@@ -10,7 +12,8 @@ import {
   BuildingOfficeIcon,
   ComputerDesktopIcon,
   ClipboardDocumentListIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ChartBarSquareIcon
 } from '@heroicons/vue/24/outline';
 
 const authStore = useAuthStore();
@@ -18,13 +21,51 @@ const currentUser = computed(() => authStore.user);
 const userRoles = computed(() => authStore.roles);
 const userPermissions = computed(() => authStore.permissions);
 
-// Métricas de muestra alineadas al sistema corporativo
-const sampleProgress = [
-  { id: 1, label: 'Portal GGSI - Módulo Aplicativos', percentage: 75 },
-  { id: 2, label: 'Gestión Documental COINSE', percentage: 90 },
-  { id: 3, label: 'Control de Acceso y Roles Spatie', percentage: 100 },
-  { id: 4, label: 'API Integración Externa', percentage: 35 },
-];
+// ==========================================
+// ESTADO REACTIVO DE MÉTRICAS EN VIVO
+// ==========================================
+const totalSistemas = ref<number | string>('...');
+const sistemasProgress = ref<Array<{ id: string | number; label: string; percentage: number }>>([]);
+const loadingStats = ref(false);
+
+const canViewPM = computed(() => authStore.hasPermission('ver.project-manager'));
+
+const fetchDashboardStats = async () => {
+  loadingStats.value = true;
+  try {
+    if (canViewPM.value) {
+      const res = await apiClient.get('/project-manager/resumen');
+      const data: ProjectManagerResumenItem[] = res.data.data || [];
+      totalSistemas.value = data.length;
+      sistemasProgress.value = data.map(item => ({
+        id: item.aplicativo_id,
+        label: `${item.nombre_aplicativo} (${item.alias})`,
+        percentage: item.avance_total || 0
+      }));
+    } else if (authStore.hasPermission('ver.aplicativos')) {
+      const res = await apiClient.get('/aplicativos');
+      const data = res.data.data || [];
+      totalSistemas.value = data.length;
+      sistemasProgress.value = data.map((item: any) => ({
+        id: item.id,
+        label: `${item.nombre_aplicativo} (${item.alias})`,
+        percentage: item.avance_total || 0
+      }));
+    } else {
+      totalSistemas.value = 0;
+      sistemasProgress.value = [];
+    }
+  } catch (error) {
+    console.error('Error al cargar métricas del Dashboard:', error);
+    totalSistemas.value = 0;
+  } finally {
+    loadingStats.value = false;
+  }
+};
+
+onMounted(() => {
+  fetchDashboardStats();
+});
 </script>
 
 <template>
@@ -50,7 +91,16 @@ const sampleProgress = [
         </div>
       </div>
 
-      <div class="flex items-center gap-3 self-start md:self-auto">
+      <!-- <div class="flex flex-wrap items-center gap-3 self-start md:self-auto">
+        <RouterLink
+          v-if="canViewPM"
+          to="/project-manager"
+          class="p-2.5 rounded-xl border border-[#BDCEE5]/60 hover:bg-[#F4F1FA] text-[#032C49] transition-colors inline-flex items-center gap-2 text-sm font-semibold shadow-xs"
+        >
+          <ChartBarSquareIcon class="h-4 w-4 text-[#81299A]" />
+          <span>Project Manager</span>
+        </RouterLink>
+
         <RouterLink
           to="/actividades"
           class="btn-primary text-sm inline-flex items-center gap-2 shadow-xs"
@@ -58,18 +108,18 @@ const sampleProgress = [
           <ClipboardDocumentListIcon class="h-4 w-4" />
           <span>Ver Actividades</span>
         </RouterLink>
-      </div>
+      </div> -->
     </div>
 
     <!-- Grid de Métricas Principales (Tokens de la Skill: rounded-2xl, gap-6) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <MetricCard
+      <!-- <MetricCard
         title="Rol Principal"
-        :value="userRoles[0] || 'Colaborador'"
+        :value="userRoles[0] || 'COLABORADOR'"
         subtitle="Nivel de privilegios asignado"
         :icon="ShieldCheckIcon"
         color-scheme="purple"
-      />
+      /> -->
       <MetricCard
         title="Permisos Activos"
         :value="userPermissions.length"
@@ -79,7 +129,7 @@ const sampleProgress = [
       />
       <MetricCard
         title="Sistemas Registrados"
-        value="6"
+        :value="totalSistemas"
         subtitle="Aplicativos vinculados"
         :icon="ComputerDesktopIcon"
         color-scheme="navy"
@@ -175,11 +225,11 @@ const sampleProgress = [
 
       <!-- Tarjeta de Progreso de Proyectos / Aplicativos (1 columna) -->
       <div class="space-y-6">
-        <ProgressCard
+        <!-- <ProgressCard
           title="Avance de Sistemas"
-          subtitle="Seguimiento de hitos y desarrollo"
-          :items="sampleProgress"
-        />
+          subtitle="Seguimiento de hitos y desarrollo en tiempo real"
+          :items="sistemasProgress"
+        /> -->
 
         <!-- Banner Informativo -->
         <div class="p-5 rounded-2xl bg-gradient-to-br from-[#032C49] to-[#322CAB] text-white shadow-sm space-y-2">

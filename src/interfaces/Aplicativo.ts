@@ -1,4 +1,3 @@
-
 export interface DetalleAplicativo {
     descripcion?: string;
     pap?: boolean;
@@ -7,6 +6,13 @@ export interface DetalleAplicativo {
     lenguajes_backend?: string;
     bases_datos?: string;
     observaciones?: string;
+}
+
+export interface MetricasActividadesAplicativo {
+    total: number;
+    culminadas: number;
+    pendientes: number;
+    atrasadas: number;
 }
 
 export interface Aplicativo {
@@ -18,6 +24,12 @@ export interface Aplicativo {
     fecha_fin: string;
     gerencia_responsable?: string | null;   // nombre de la gerencia responsable para mostrarlo en el frontend
     gerencia_id?: number;   // id de la gerencia responsable para ignorarla al actualizar la gerencia
-    avanceAplicativo?: number;
+    avance_total?: number;
+    avance_pendiente?: number;
+    metricas_actividades?: MetricasActividadesAplicativo;
+    avanceAplicativo?: number; // compatibilidad legacy
     detalles?: DetalleAplicativo[];
+    descripcion?: string;
+    pap?: boolean;
+    estatus?: string;
 }

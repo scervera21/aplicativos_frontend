@@ -37,7 +37,7 @@ const form = ref({
 });
 
 // Permiso para gestionar (si tiene permiso o es admin)
-const canManage = computed(() => authStore.hasPermission('gestionar.gerencias') || authStore.hasRole('ADMIN') || authStore.hasRole('administrador'));
+const canManage = computed(() => authStore.hasPermission('gestionar.gerencias') || authStore.hasRole('ADMINISTRADOR'));
 
 // Configuración de Columnas del DataTable según las Skills
 const tableColumns = ref<DataTableColumn[]>([

@@ -81,6 +81,7 @@ src/
 │   ├── Aplicativo.ts                # Tipos para aplicativos y especificaciones técnicas
 │   ├── Area.ts                      # Tipos para áreas organizacionales
 │   ├── Gerencia.ts                  # Tipos para gerencias operativas
+│   ├── ProjectManager.ts            # Tipos para ciclo de vida por áreas, métricas y mutaciones reactivas
 │   └── User.ts                      # Tipos para usuario, roles y permisos Spatie
 ├── plugins/
 │   └── axios.ts                     # Instancia Axios con interceptores JWT y auto-refresh
@@ -198,8 +199,9 @@ El enrutamiento se gestiona en [src/router/index.ts](file:///c:/Users/PC/Documen
 | `/gerencias` | `Gerencias` | `views/Gerencias.vue` | `requiresAuth: true`, `permission: 'ver.gerencias'` |
 | `/roles` | `Roles y Permisos`| `views/Roles-Permissions.vue` | `requiresAuth: true`, `permission: 'ver.roles'` |
 | `/actividades` | `Actividades` | `views/Actividades.vue` | `requiresAuth: true`, `permission: 'ver.actividades'` |
-| `/project-manager` | - | `views/ProjectManager.vue` | `requiresAuth: true`, `permission: 'ver.project-manager'` |
-| `/aplicativos/:actividadID/project-manager` | `ProjectManager` | `views/ProjectManager.vue` | `requiresAuth: true`, `permission: 'gestionar.project-manager'` |
+| `/project-manager` | `ProjectManager` | `views/ProjectManager.vue` | `requiresAuth: true`, `permission: 'ver.project-manager'` |
+| `/project-manager/:aplicativoID` | `ProjectManagerDetalle` | `views/ProjectManager.vue` | `requiresAuth: true`, `permission: 'ver.project-manager'` |
+| `/aplicativos/:aplicativoID/project-manager` | - | *Redirect* a `/project-manager/:aplicativoID` | `requiresAuth: true` |
 | `/:pathMatch(.*)*` | `not-found` | `views/error/404.vue` | Pública (Página de error 404) |
 
 ### Navigation Guards (`beforeEach`)
