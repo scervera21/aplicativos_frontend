@@ -77,7 +77,7 @@ const tableUsers = computed(() => {
   return users.value.map(u => ({
     ...u,
     full_name: `${u.first_name || ''} ${u.last_name || ''}`.trim(),
-    gerencia_nombre: u.gerencia?.sigla || u.gerencia?.nombre_gerencia || 'Sin gerencia',
+    gerencia_nombre: u.gerencia?.sigla || u.gerencia?.nombre_gerencia || '—',
   }));
 });
 
@@ -250,7 +250,7 @@ const handleDelete = async (user: User) => {
 
 // Formateador de roles para visualización
 const formatRoles = (roles?: (Role | string)[]) => {
-  if (!roles || roles.length === 0) return 'Sin rol';
+  if (!roles || roles.length === 0) return '—';
   return roles
     .map(r => (typeof r === 'string' ? r : r.name))
     .join(', ');

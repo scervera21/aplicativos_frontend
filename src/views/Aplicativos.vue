@@ -339,13 +339,13 @@ onMounted(async () => {
 
       <!-- Responsable -->
       <template #cell-responsable="{ value }">
-        <span class="text-xs text-gray-700 font-medium">{{ value || 'Sin asignar' }}</span>
+        <span class="text-xs text-gray-700 font-medium">{{ value || '—' }}</span>
       </template>
 
       <!-- Gerencia Responsable -->
       <template #cell-gerencia_responsable="{ value }">
         <span class="text-xs text-gray-700 font-medium">
-          {{ value || 'N/A' }}
+          {{ value || '—' }}
         </span>
       </template>
 
@@ -730,7 +730,7 @@ onMounted(async () => {
       </div>
 
       <div v-else class="p-6 text-center text-xs text-gray-400 italic">
-        No hay detalles técnicos registrados para este aplicativo.
+        Sin observaciones
       </div>
     </Modal>
   </div>

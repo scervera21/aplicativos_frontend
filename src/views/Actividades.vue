@@ -635,7 +635,7 @@ onMounted(async () => {
 
         <!-- Fechas -->
         <template #cell-fecha_creacion="{ value }">
-          <span class="text-xs text-gray-600 font-mono">{{ value || 'N/A' }}</span>
+          <span class="text-xs text-gray-600 font-mono">{{ value || '—' }}</span>
         </template>
 
         <template #cell-fecha_culminacion="{ value }">
@@ -720,7 +720,7 @@ onMounted(async () => {
             >
               <option :value="null" disabled>Seleccionar Aplicativo...</option>
               <option v-for="app in aplicativos" :key="app.id" :value="app.id">
-                {{ app.nombre_aplicativo }} ({{ app.alias || `#${app.id}` }})
+                {{ app.nombre_aplicativo }} ({{ app.alias }})
               </option>
             </select>
             <p v-if="formErrors.aplicativo_id" class="mt-1 text-xs text-rose-600 font-medium">
@@ -1017,7 +1017,7 @@ onMounted(async () => {
         <div class="p-3.5 bg-white rounded-xl border border-[#BDCEE5]/50 space-y-1">
           <span class="text-xs font-bold uppercase tracking-wider text-gray-500 block">Comentarios / Observaciones</span>
           <p class="text-xs text-gray-700 leading-relaxed italic bg-[#F4F1FA]/50 p-2.5 rounded-lg border border-[#BDCEE5]/30">
-            {{ selectedActividadDetails.comentarios || 'Ninguno' }}
+            {{ selectedActividadDetails.comentarios || 'N/A' }}
           </p>
         </div>
       </div>
