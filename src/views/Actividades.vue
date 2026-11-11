@@ -180,20 +180,25 @@ const fetchActividades = async () => {
 
 const fetchAuxiliaryData = async () => {
   try {
-    const [resAreas, resApps, resGerencias] = await Promise.allSettled([
+    const promises: Promise<any>[] = [
       apiClient.get('/areas'),
-      apiClient.get('/aplicativos'),
-      apiClient.get('/gerencias')
-    ]);
+      apiClient.get('/aplicativos')
+    ];
 
-    if (resAreas.status === 'fulfilled') {
-      areas.value = resAreas.value.data.data || [];
+    if (authStore.hasPermission('ver.gerencias')) {
+      promises.push(apiClient.get('/gerencias'));
     }
-    if (resApps.status === 'fulfilled') {
-      aplicativos.value = resApps.value.data.data || [];
+
+    const results = await Promise.allSettled(promises);
+
+    if (results[0] && results[0].status === 'fulfilled') {
+      areas.value = results[0].value.data.data || [];
     }
-    if (resGerencias.status === 'fulfilled') {
-      gerencias.value = resGerencias.value.data.data || [];
+    if (results[1] && results[1].status === 'fulfilled') {
+      aplicativos.value = results[1].value.data.data || [];
+    }
+    if (results[2] && results[2].status === 'fulfilled') {
+      gerencias.value = results[2].value.data.data || [];
     }
   } catch (error) {
     console.error('Error al cargar datos auxiliares:', error);
@@ -204,6 +209,11 @@ const fetchAuxiliaryData = async () => {
 // GESTIÓN DEL MODAL COMPLETO (CREAR / EDITAR)
 // ==========================================
 const openCreateModal = () => {
+  if (gerencias.value.length === 0 && authStore.hasPermission('ver.gerencias')) {
+    apiClient.get('/gerencias').then(res => {
+      gerencias.value = res.data.data || [];
+    }).catch(() => {});
+  }
   isEditing.value = false;
   editingActividadId.value = null;
   formErrors.value = {};
@@ -232,6 +242,11 @@ const openCreateModal = () => {
 };
 
 const openEditModal = (actividad: Actividad) => {
+  if (gerencias.value.length === 0 && authStore.hasPermission('ver.gerencias')) {
+    apiClient.get('/gerencias').then(res => {
+      gerencias.value = res.data.data || [];
+    }).catch(() => {});
+  }
   isEditing.value = true;
   editingActividadId.value = actividad.id;
   formErrors.value = {};
@@ -580,7 +595,7 @@ onMounted(async () => {
               {{ gerencia.sigla || gerencia.nombre_gerencia }}
             </span>
           </div>
-          <span v-else class="text-xs text-gray-400 italic">Ninguna</span>
+          <span v-else class="text-xs text-gray-400 italic">—</span>
         </template>
 
         <!-- Porcentaje de Avance con Barra Visual y Botón de Ajuste Rápido -->
@@ -596,14 +611,14 @@ onMounted(async () => {
             <span class="text-xs font-mono font-bold text-[#032C49] min-w-[34px] text-right">
               {{ row.porcentaje || 0 }}%
             </span>
-            <button
+            <!--<button
               v-if="canManage"
               @click="openQuickPercentage(row)"
               class="p-1 text-[#81299A] hover:bg-[#F4F1FA] rounded-md transition-colors cursor-pointer"
               title="Ajustar porcentaje rápido"
             >
               <ArrowTrendingUpIcon class="h-3.5 w-3.5" />
-            </button>
+            </button>-->
           </div>
         </template>
 

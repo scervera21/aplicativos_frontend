@@ -7,6 +7,8 @@ export interface ProjectManagerAplicativoInfo {
   responsable: string;
   gerencia_id?: number | null;
   gerencia_responsable?: string;
+  gerencia_sigla?: string | null;
+  gerencia_nombre?: string | null;
   estatus?: string;
   pap?: boolean;
 }
@@ -44,6 +46,8 @@ export interface ProjectManagerResumenItem {
   nombre_aplicativo: string;
   alias: string;
   gerencia: string;
+  gerencia_sigla?: string | null;
+  gerencia_nombre?: string | null;
   responsable: string;
   avance_total: number;
   avance_pendiente: number;

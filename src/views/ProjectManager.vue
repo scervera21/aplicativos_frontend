@@ -366,10 +366,6 @@ const handleSavePercentage = async () => {
     <!-- Encabezado del Módulo con Controles de Navegación -->
     <ModuleHeader
       title="Project Manager"
-      :subtitle="projectData
-        ? `Monitoreo del ciclo de vida y cálculo de avance para ${projectData.aplicativo.nombre_aplicativo}`
-        : 'Visión general de seguimiento y ciclo de vida de los sistemas institucionales'"
-      :icon="ChartBarSquareIcon"
     >
       <template #actions>
         <div class="flex flex-wrap items-center gap-3">
@@ -380,13 +376,13 @@ const handleSavePercentage = async () => {
               @change="(e: any) => selectAplicativo(e.target.value ? Number(e.target.value) : null)"
               class="px-3.5 py-2 pr-8 rounded-xl border border-[#BDCEE5]/60 bg-white text-sm text-[#032C49] font-semibold focus:outline-none focus:ring-2 focus:ring-[#81299A] shadow-xs cursor-pointer"
             >
-              <option value="">🏢 Todos los Sistemas (Resumen)</option>
+              <option value="">🏢 Todos los Sistemas</option>
               <option
                 v-for="item in resumenGeneral"
                 :key="item.aplicativo_id"
                 :value="item.aplicativo_id"
               >
-                {{ item.nombre_aplicativo }} ({{ item.alias }})
+                {{ item.nombre_aplicativo }} 
               </option>
             </select>
           </div>
@@ -399,17 +395,6 @@ const handleSavePercentage = async () => {
             title="Recargar datos"
           >
             <ArrowPathIcon class="h-4 w-4" :class="{ 'animate-spin': loading }" />
-            <span class="hidden sm:inline">Refrescar</span>
-          </button>
-
-          <!-- Botón Volver a Resumen si estamos en un aplicativo -->
-          <button
-            v-if="projectData"
-            @click="selectAplicativo(null)"
-            class="p-2.5 rounded-xl border border-[#BDCEE5]/60 hover:bg-[#F4F1FA] text-[#032C49] transition-colors inline-flex items-center gap-2 text-sm font-medium shadow-xs"
-          >
-            <ArrowLeftIcon class="h-4 w-4" />
-            <span class="hidden sm:inline">Ver Resumen General</span>
           </button>
         </div>
       </template>
@@ -420,7 +405,7 @@ const handleSavePercentage = async () => {
       <div class="inline-flex p-4 bg-[#F4F1FA] rounded-2xl text-[#81299A] animate-spin">
         <ArrowPathIcon class="h-8 w-8" />
       </div>
-      <p class="text-sm font-semibold text-[#032C49]">Cargando ciclo de vida del Project Manager...</p>
+      <p class="text-sm font-semibold text-[#032C49]">Cargando Project Manager...</p>
     </div>
 
     <!-- ========================================================================= -->
@@ -439,21 +424,6 @@ const handleSavePercentage = async () => {
               <h2 class="text-xl md:text-2xl font-extrabold text-[#032C49]">
                 {{ projectData.aplicativo.nombre_aplicativo }}
               </h2>
-              <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#F4F1FA] text-[#81299A] border border-[#81299A]/20">
-                {{ projectData.aplicativo.alias }}
-              </span>
-              <span
-                v-if="projectData.aplicativo.pap"
-                class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
-              >
-                Pase a Producción (PAP)
-              </span>
-              <span
-                v-if="projectData.aplicativo.estatus"
-                class="px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-[#322CAB] border border-blue-200"
-              >
-                {{ projectData.aplicativo.estatus }}
-              </span>
             </div>
             <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-xs text-gray-500 font-medium">
               <span class="flex items-center gap-1.5">
@@ -466,19 +436,6 @@ const handleSavePercentage = async () => {
               </span>
             </div>
           </div>
-        </div>
-
-        <!-- Indicador de Privilegios RBAC -->
-        <div class="self-start md:self-center shrink-0">
-          <span
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border"
-            :class="canManage
-              ? 'bg-purple-50 text-[#81299A] border-[#81299A]/30'
-              : 'bg-slate-50 text-slate-600 border-slate-200'"
-          >
-            <ShieldCheckIcon class="h-4 w-4" />
-            {{ canManage ? 'Modo Gestión Activo (Admin)' : 'Modo Solo Lectura' }}
-          </span>
         </div>
       </div>
 
@@ -503,14 +460,12 @@ const handleSavePercentage = async () => {
               :style="{ width: `${Math.min(Math.max(projectData.indicadores.avance_total, 0), 100)}%` }"
             />
           </div>
-          <p class="text-[11px] text-gray-400 font-medium">Cálculo dinámico basado en actividades dependientes</p>
         </div>
 
         <!-- Avance Pendiente -->
         <MetricCard
           title="Avance Pendiente"
           :value="`${projectData.indicadores.avance_pendiente}%`"
-          subtitle="Porcentaje restante para culminación"
           :icon="ClockIcon"
           color-scheme="blue"
         />
@@ -519,7 +474,6 @@ const handleSavePercentage = async () => {
         <MetricCard
           title="Tareas Culminadas"
           :value="`${projectData.indicadores.metricas.culminadas} / ${projectData.indicadores.metricas.total}`"
-          subtitle="Entregables al 100%"
           :icon="CheckCircleIcon"
           color-scheme="emerald"
         />
@@ -544,10 +498,6 @@ const handleSavePercentage = async () => {
             class="w-full pl-3.5 pr-4 py-2 border border-[#BDCEE5]/60 rounded-xl text-sm text-[#032C49] focus:outline-none focus:ring-2 focus:ring-[#81299A]"
           />
         </div>
-
-        <div class="text-xs text-gray-500 font-medium">
-          Mostrando fases predefinidas del ciclo de vida
-        </div>
       </div>
 
       <!-- Ciclo de Vida Agrupado por Áreas Predefinidas -->
@@ -571,9 +521,9 @@ const handleSavePercentage = async () => {
                   <h3 class="text-base font-bold text-[#032C49]">
                     {{ area.nombre_area }}
                   </h3>
-                  <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                <!--  <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
                     {{ area.total_actividades }} {{ area.total_actividades === 1 ? 'actividad' : 'actividades' }}
-                  </span>
+                  </span>-->
                 </div>
                 <p class="text-xs text-gray-500 mt-0.5">
                   {{ area.actividades_culminadas }} de {{ area.total_actividades }} actividades completadas
@@ -585,7 +535,6 @@ const handleSavePercentage = async () => {
             <div class="flex items-center gap-6">
               <div class="w-36 md:w-48 space-y-1">
                 <div class="flex justify-between text-xs font-mono font-bold">
-                  <span class="text-gray-500">Sub-Avance</span>
                   <span class="text-[#81299A]">{{ area.avance_area }}%</span>
                 </div>
                 <div class="w-full bg-[#F4F1FA] h-2 rounded-full overflow-hidden border border-[#BDCEE5]/30">
@@ -606,18 +555,18 @@ const handleSavePercentage = async () => {
           <!-- Contenido del Área: Tabla Interactiva de Actividades -->
           <div v-show="expandedAreas[area.area_id]" class="p-5 bg-white">
             <div v-if="getFilteredActivities(area).length === 0" class="py-8 text-center text-xs text-gray-400 italic">
-              No hay actividades registradas en esta fase para este aplicativo.
+              Sin actividades registradas en esta area.
             </div>
 
             <div v-else class="overflow-x-auto">
               <table class="w-full text-left border-collapse">
                 <thead>
                   <tr class="border-b border-[#BDCEE5]/30 text-[11px] font-bold uppercase tracking-wider text-gray-500 bg-[#F4F1FA]/40">
-                    <th class="py-3 px-3 text-center w-14">Check</th>
-                    <th class="py-3 px-3">Actividad / Tarea</th>
+                    <th class="py-3 px-3 text-center w-14"></th>
+                    <th class="py-3 px-3">Progreso</th>
                     <th class="py-3 px-3 w-28 text-center">Prioridad</th>
                     <th class="py-3 px-3 w-32 text-center">Estado</th>
-                    <th class="py-3 px-3 w-48">Avance Percentil</th>
+                    <th class="py-3 px-3 w-48">Avance</th>
                     <th class="py-3 px-3 w-28 text-center">Acciones</th>
                   </tr>
                 </thead>
@@ -656,12 +605,12 @@ const handleSavePercentage = async () => {
                           <span v-else>
                             Inicio: {{ actividad.fecha_creacion }}
                           </span>
-                          <span
+                          <!--<span
                             v-if="actividad.gerencias_colaboradoras && actividad.gerencias_colaboradoras.length"
                             class="text-gray-400"
                           >
                             • {{ actividad.gerencias_colaboradoras.length }} gerencia(s) colaboradora(s)
-                          </span>
+                          </span>-->
                         </div>
                       </div>
                     </td>
@@ -742,18 +691,6 @@ const handleSavePercentage = async () => {
     <!-- MODO 2: RESUMEN GENERAL DE TODOS LOS APLICATIVOS                           -->
     <!-- ========================================================================= -->
     <div v-else class="space-y-6">
-      
-      <div class="bg-white p-6 rounded-2xl shadow-xs border border-[#BDCEE5]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h2 class="text-lg font-bold text-[#032C49]">Inventario de Sistemas y Avances Generales</h2>
-          <p class="text-xs text-gray-500 mt-0.5">
-            Selecciona un aplicativo para auditar su ciclo de vida y gestionar el avance de sus actividades.
-          </p>
-        </div>
-        <span class="text-xs font-semibold px-3 py-1 bg-[#F4F1FA] text-[#81299A] rounded-xl border border-[#81299A]/20">
-          {{ resumenGeneral.length }} sistemas inventariados
-        </span>
-      </div>
 
       <!-- Grid de Aplicativos -->
       <div v-if="resumenGeneral.length === 0" class="bg-white p-12 rounded-2xl border border-[#BDCEE5]/40 text-center space-y-3">
@@ -773,24 +710,21 @@ const handleSavePercentage = async () => {
                 <h3 class="text-base font-bold text-[#032C49] leading-snug">
                   {{ app.nombre_aplicativo }}
                 </h3>
-                <span class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-[#F4F1FA] text-[#81299A] border border-[#81299A]/20">
+                <span v-if="app.alias" class="inline-block mt-1 px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-[#F4F1FA] text-[#81299A] border border-[#81299A]/20">
                   {{ app.alias }}
                 </span>
               </div>
-              <div class="p-2 bg-[#F4F1FA] rounded-xl text-[#81299A]">
-                <ComputerDesktopIcon class="h-5 w-5" />
-              </div>
             </div>
 
-            <div class="space-y-1 text-xs text-gray-500">
+            <!--<div class="space-y-1 text-xs text-gray-500">
               <p>Gerencia: <strong class="text-[#032C49]">{{ app.gerencia }}</strong></p>
               <p>Responsable: <strong class="text-[#032C49]">{{ app.responsable }}</strong></p>
-            </div>
+            </div>-->
 
             <!-- Avance Total -->
             <div class="space-y-1 pt-2">
               <div class="flex justify-between text-xs font-semibold">
-                <span class="text-gray-500">Progreso Ponderado</span>
+                <span class="text-gray-500">Progreso</span>
                 <span class="text-[#81299A] font-mono font-bold">{{ app.avance_total }}%</span>
               </div>
               <div class="w-full bg-[#F4F1FA] h-2.5 rounded-full overflow-hidden border border-[#BDCEE5]/30">
@@ -824,7 +758,7 @@ const handleSavePercentage = async () => {
             class="w-full btn-primary text-xs py-2.5 flex items-center justify-center gap-2 cursor-pointer shadow-xs"
           >
             <ChartBarSquareIcon class="h-4 w-4" />
-            <span>Ver Ciclo de Vida</span>
+            <span>Ver Project</span>
           </button>
         </div>
       </div>

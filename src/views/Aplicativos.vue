@@ -77,7 +77,7 @@ const tableColumns = ref<DataTableColumn[]>([
   { key: 'nombre_aplicativo', label: 'Nombre Aplicativo', sortable: true, align: 'left' },
   { key: 'alias', label: 'Alias', sortable: true, width: 'w-28', align: 'center' },
   { key: 'responsable', label: 'Responsable', sortable: true, align: 'left' },
-  { key: 'gerencia_responsable', label: 'Gerencia', sortable: true, align: 'left' },
+  { key: 'gerencia_responsable', label: 'Gerencia Responsable', sortable: true, align: 'left' },
   { key: 'avance_total', label: 'Avance', sortable: true, width: 'w-36', align: 'left' },
   { key: 'fecha_inicio', label: 'Fecha Inicio', sortable: true, width: 'w-32', align: 'center' },
   { key: 'fecha_fin', label: 'Fecha Fin', sortable: true, width: 'w-32', align: 'center' },
@@ -110,6 +110,7 @@ const fetchAplicativos = async () => {
 };
 
 const fetchGerencias = async () => {
+  if (!authStore.hasPermission('ver.gerencias')) return;
   try {
     const response = await apiClient.get('/gerencias');
     gerencias.value = response.data.data || [];
@@ -138,6 +139,9 @@ const viewDetails = async (app: Aplicativo) => {
 // GESTIÓN DEL FORMULARIO COMPLETO
 // ==========================================
 const openCreateModal = () => {
+  if (gerencias.value.length === 0 && authStore.hasPermission('ver.gerencias')) {
+    fetchGerencias();
+  }
   isEditing.value = false;
   editingAplicativoId.value = null;
   formErrors.value = {};
@@ -160,13 +164,21 @@ const openCreateModal = () => {
 };
 
 const openEditModal = async (app: Aplicativo) => {
+  if (gerencias.value.length === 0 && authStore.hasPermission('ver.gerencias')) {
+    await fetchGerencias();
+  }
   isEditing.value = true;
   editingAplicativoId.value = app.id;
   formErrors.value = {};
 
-  // Rescatar la gerencia registrada ya sea por id o por coincidencia con el nombre de gerencia
+  // Rescatar la gerencia registrada ya sea por id o por coincidencia con el nombre o sigla de gerencia
   const matchedGerencia = gerencias.value.find(
-    g => g.id === app.gerencia_id || (app.gerencia_responsable && g.nombre_gerencia.trim().toLowerCase() === app.gerencia_responsable.trim().toLowerCase())
+    g => g.id === app.gerencia_id ||
+      (app.gerencia_sigla && g.sigla && g.sigla.trim().toLowerCase() === app.gerencia_sigla.trim().toLowerCase()) ||
+      (app.gerencia_responsable && (
+        g.nombre_gerencia.trim().toLowerCase() === app.gerencia_responsable.trim().toLowerCase() ||
+        (g.sigla && g.sigla.trim().toLowerCase() === app.gerencia_responsable.trim().toLowerCase())
+      ))
   );
 
   form.value = {
@@ -285,7 +297,11 @@ const handleDelete = async (app: Aplicativo) => {
 };
 
 onMounted(async () => {
-  await Promise.all([fetchAplicativos(), fetchGerencias()]);
+  const promises: Promise<any>[] = [fetchAplicativos()];
+  if (authStore.hasPermission('ver.gerencias')) {
+    promises.push(fetchGerencias());
+  }
+  await Promise.all(promises);
 });
 </script>
 
@@ -351,9 +367,16 @@ onMounted(async () => {
       </template>
 
       <!-- Gerencia Responsable -->
-      <template #cell-gerencia_responsable="{ value }">
-        <span class="text-xs text-gray-700 font-medium">
-          {{ value || '—' }}
+      <template #cell-gerencia_responsable="{ row, value }">
+        <span
+          v-if="row.gerencia_sigla || (row.gerencia && row.gerencia.sigla)"
+          class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-[#BDCEE5]/25 text-[#032C49] border border-[#BDCEE5]/60 shadow-2xs"
+          :title="row.gerencia_nombre || row.gerencia?.nombre_gerencia || ''"
+        >
+          {{ row.gerencia_sigla || row.gerencia?.sigla }}
+        </span>
+        <span v-else class="text-xs text-gray-700 font-medium">
+          {{ value || 'No posee' }}
         </span>
       </template>
 
@@ -579,7 +602,7 @@ onMounted(async () => {
                 class="h-4 w-4 rounded border-[#BDCEE5] text-[#81299A] focus:ring-[#81299A] cursor-pointer"
               />
               <label for="pap_check" class="text-xs font-bold uppercase tracking-wider text-[#032C49] cursor-pointer">
-                Pase a Producción (PAP)
+                Implementado
               </label>
             </div>
             <p v-if="formErrors.pap" class="mt-1 text-xs text-rose-600 font-medium">
@@ -730,7 +753,7 @@ onMounted(async () => {
 
         <!-- Estado de PAP (Pase a Producción) -->
         <div class="p-3 bg-white border border-[#BDCEE5]/50 rounded-xl flex items-center justify-between text-xs">
-          <span class="font-bold text-gray-600">Pase a Producción (PAP)</span>
+          <span class="font-bold text-gray-600">Implementado</span>
           <span
             class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full font-semibold"
             :class="selectedDetails.pap ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-gray-100 text-gray-600 border border-gray-200'"

@@ -156,7 +156,6 @@ onMounted(() => {
               <UserCircleIcon class="h-5 w-5 text-[#81299A]" />
               Ficha del Usuario
             </h3>
-            <span class="text-xs text-gray-400 font-mono">ID: #{{ currentUser?.id || '—' }}</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
@@ -179,7 +178,7 @@ onMounted(() => {
           <!-- Roles Asignados -->
           <div class="pt-2">
             <span class="block text-xs font-bold uppercase tracking-wider text-[#032C49] mb-2">
-              Roles Institucionales (Spatie)
+              Roles
             </span>
             <div class="flex flex-wrap gap-2">
               <span
@@ -200,7 +199,7 @@ onMounted(() => {
         <div class="bg-white p-6 rounded-2xl shadow-xs border border-[#BDCEE5]/40 space-y-3">
           <div class="flex items-center justify-between border-b border-[#BDCEE5]/30 pb-3">
             <h3 class="text-base font-bold text-[#032C49]">
-              Permisos Habilitados en Sesión
+              Permisos Habilitados
             </h3>
             <span class="text-xs font-mono font-semibold text-[#81299A] bg-[#F4F1FA] px-2.5 py-0.5 rounded-full">
               {{ userPermissions.length }} activos
